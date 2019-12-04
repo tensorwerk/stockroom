@@ -5,57 +5,42 @@ from ..utils import get_current_head, get_stock_root
 from .. import parser
 
 
-def get_aset(co, name, dtype=None, longest=None, variable=False):
-    try:
-        aset = co.arraysets[name]
-        return aset
-    except KeyError:
-        pass
-    aset = co.arraysets.init_arrayset(
-        name, dtype=np.dtype(dtype), shape=(longest,), variable_shape=variable)
-    return aset
-
-# TODO: figure out what' the importance of max shape if var_shape is True
-
-
 class ModelStore(StorageBase):
-    def __init__(self):
+    def __init__(self, write):
         super().__init__()
+        self.write = write
 
     def save(self, name, model):
-        # TODO: optimize
+        if not self.write:
+            raise RuntimeError("model store instance is not write-enabled")
         co = self.repo.checkout(write=True)
         if hasattr(model, 'state_dict'):
-            library = 'torch'
             state = model.state_dict()
-            layers = list(state.keys())
-            # TODO: forloop for all needs or list comprehension few times
             weights = [x.numpy() for x in state.values()]
-            str_layer = parser.layers_to_string(layers)
-            co.metadata[parser.metakey(name, 'layers')] = str_layer
+            layers = state.keys()
+            library = 'torch'
         elif hasattr(model, 'get_weights'):
             library = 'tf'
-            # tf model
+            layers = None
             weights = model.get_weights()
         else:
             raise TypeError("Unknown model type. StockRoom can work with only "
                             "``Keras.Model`` or ``torch.nn.Module`` modules")
-        longest = max([len(x.reshape(-1)) for x in weights])
-        co.metadata[parser.metakey(name, 'library')] = library
-        co.metadata[parser.metakey(name, 'longest')] = str(longest)
-        co.metadata[parser.metakey(name, 'num_layers')] = str(len(weights))
+        # TODO: make sure the longest becoming longer is not an issue: add test
+        longest = str(max([len(x.reshape(-1)) for x in weights]))
         dtypes = [w.dtype.name for w in weights]
-        str_dtypes = parser.dtypes_to_string(dtypes)
-        co.metadata[parser.metakey(name, 'dtypes')] = str_dtypes
-        aset_prefix = parser.model_asetkey_from_details(name, str(longest))
-        co.metadata[parser.metakey(name, 'aset_prefix')] = aset_prefix
-        shape_asetn = parser.shape_asetkey_from_model_asetkey(name)
-        shape_aset = co.arraysets.init_arrayset(
-            shape_asetn, shape=(10,), dtype=np.int64, variable_shape=True)
+        self._store_metadata(co, name,
+                             library=library,
+                             longest=longest,
+                             dtypes=dtypes,
+                             numLayers=str(len(weights)),
+                             layers=layers)
+        shapeKey = parser.shapekey(name, longest)
+        shape_aset = self._get_aset(co, shapeKey, 10, 'int64', variable_shape=True)
         for i, w in enumerate(weights):
-            asetn = parser.model_asetkey_from_details(aset_prefix, dtypes[i])
-            aset = get_aset(co, asetn, dtypes[i], longest, variable=True)
-            aset[i] = w.reshape(-1)
+            modelKey = parser.modelkey(name, longest, dtypes[i])
+            model_aset = self._get_aset(co, modelKey, int(longest), dtypes[i], variable_shape=True)
+            model_aset[i] = w.reshape(-1)
             if w.shape:
                 shape_aset[i] = np.array(w.shape)
             else:
@@ -63,35 +48,67 @@ class ModelStore(StorageBase):
         co.close()
 
     def load(self, name, model):
-        import torch
         root = get_stock_root()
         head_commit = get_current_head(root)
         co = self.repo.checkout(commit=head_commit)
-        aset_prefix = co.metadata[parser.metakey(name, 'aset_prefix')]
-        dtypes = parser.string_to_dtypes(co.metadata[parser.metakey(name, 'dtypes')])
-        library = co.metadata[parser.metakey(name, 'library')]
-        num_layers = int(co.metadata[parser.metakey(name, 'num_layers')])
+        library, longest, dtypes, numLayers, layers = self._get_metadata(co, name)
+        shapeKey = parser.shapekey(name, longest)
+        shape_aset = self._get_aset(co, shapeKey)
         weights = []
-        for i in range(num_layers):
-            asetn = parser.model_asetkey_from_details(aset_prefix, dtypes[i])
-            aset = get_aset(co, asetn)
-            shape_asetn = parser.shape_asetkey_from_model_asetkey(name)
-            shape_aset = co.arraysets[shape_asetn]
+        for i in range(numLayers):
+            modelKey = parser.modelkey(name, longest, dtypes[i])
+            aset = self._get_aset(co, modelKey)
             w = aset[i].reshape(np.array(shape_aset[i]))
             weights.append(w)
-        if len(weights) != num_layers:
+        if len(weights) != numLayers:
             raise RuntimeError("Critical: length doesn't match. Raise an issue")
         if library == 'torch':
-            str_layers = co.metadata[parser.metakey(name, 'layers')]
-            layers = parser.string_to_layers(str_layers)
-            if len(layers) != num_layers:
+            import torch
+            if len(layers) != numLayers:
                 raise RuntimeError("Critical: length doesn't match. Raise an issue")
-            state = {layers[i]: torch.from_numpy(weights[i]) for i in range(num_layers)}
+            state = {layers[i]: torch.from_numpy(weights[i]) for i in range(numLayers)}
             model.load_state_dict(state)
         else:
             model.set_weights(weights)
 
+    @staticmethod
+    def _store_metadata(co, name, library, longest, dtypes, numLayers, layers=None):
+        co.metadata[parser.metakey(name, 'library')] = library
+        if library == 'torch':
+            if layers is None:
+                raise ValueError("Could not fetch layer information for the torch model")
+            co.metadata[parser.metakey(name, 'layers')] = parser.encode(layers)
+        co.metadata[parser.metakey(name, 'library')] = library
+        co.metadata[parser.metakey(name, 'longest')] = longest
+        co.metadata[parser.metakey(name, 'numLayers')] = numLayers
+        co.metadata[parser.metakey(name, 'dtypes')] = parser.encode(dtypes)
+
+    @staticmethod
+    def _get_metadata(co, name):
+        library = co.metadata[parser.metakey(name, 'library')]
+        if library == 'torch':
+            layers = co.metadata[parser.metakey(name, 'layers')]
+            layers = parser.decode(layers)
+        else:
+            layers = None
+        library = co.metadata[parser.metakey(name, 'library')]
+        longest = co.metadata[parser.metakey(name, 'longest')]
+        numLayers = co.metadata[parser.metakey(name, 'numLayers')]
+        dtypes = co.metadata[parser.metakey(name, 'dtypes')]
+        dtypes = parser.decode(dtypes)
+        return library, longest, dtypes, numLayers, layers
+
+    @staticmethod
+    def _get_aset(co, name, longest=None, dtype=None, variable_shape=False):
+        try:
+            aset = co.arraysets[name]
+        except KeyError:
+            aset = co.arraysets.init_arrayset(
+                name, dtype=np.dtype(dtype), shape=(longest,), variable_shape=variable_shape)
+        return aset
 
 
+def modelstore(write=False):
+    return ModelStore(write=write)
 
 
