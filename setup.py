@@ -11,7 +11,7 @@ setuptools.setup(
     description="A high level data and model versioning toolkit sits on top of hangar",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/hhsecond/stockroom",
+    url="https://github.com/tensorwerk/stockroom",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -1,35 +1,32 @@
 # TODO: best practices like utf8
-# TODO: is this separater enough
+# TODO: is this separater enough - add test cases?
 SEP = '--_'
 PREFIX = '_STOCK'
 
 
-def metakey(model, name):
-    return f"{PREFIX}_metakey_{model}_{name}"
+# ===================================================
+#         Metadata & Arrayset key parsers
+# ===================================================
+def metakey(name, model):
+    return f"{PREFIX}{SEP}{model}{SEP}{name}"
 
 
-def model_asetkey_from_details(*args):
-    # TODO: make more reliable hash rather than time.time()
-    asetkey = f"{PREFIX}{SEP}"
-    return asetkey + SEP.join(args)
+def modelkey(name, longest, dtype):
+    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}{dtype}"
 
 
-def shape_asetkey_from_model_asetkey(model_asetkey):
-    return model_asetkey + '_shape'
+def shapekey(name, longest):
+    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}{'shape'}"
 
 
-# TODO: move this somewhere more sensib
-def layers_to_string(layers):
+# ====================================================
+#         Metadata Value parsers
+# ====================================================
+
+# TODO: better names
+def encode(layers):
     return ','.join(layers)
 
 
-def string_to_layers(string):
-    return string.split(',')
-
-
-def dtypes_to_string(dtypes):
-    return ','.join(dtypes)
-
-
-def string_to_dtypes(string):
+def decode(string):
     return string.split(',')

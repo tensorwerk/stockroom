@@ -1,10 +1,8 @@
-from stockroom.storages import DataStore
-from stockroom.storages import ModelStore
-from stockroom.storages import ParamStore
-from stockroom.storages import MetricStore
+from stockroom.storages import datastore
+from stockroom.storages import modelstore
+from stockroom.storages import paramstore
+from stockroom.storages import metricstore
 from .repository import init, commit
 
 
-# TODO: Simplify APIs by not making users initiate a storage class each time
-
-__all__ = ['DataStore', 'ModelStore', 'ParamStore', 'MetricStore', 'init', 'commit']
+__all__ = ['datastore', 'modelstore', 'paramstore', 'metricstore', 'init', 'commit']
