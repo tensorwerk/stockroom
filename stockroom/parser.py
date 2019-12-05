@@ -7,7 +7,7 @@ PREFIX = '_STOCK'
 # ===================================================
 #         Metadata & Arrayset key parsers
 # ===================================================
-def metakey(name, model):
+def metakey(model, name):
     return f"{PREFIX}{SEP}{model}{SEP}{name}"
 
 
