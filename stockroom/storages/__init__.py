@@ -1,4 +1,6 @@
-from .datastore import datastore
-from .modelstore import modelstore
-from .metricstore import metricstore
-from .paramstore import paramstore
+from .data import datastore
+from .model import modelstore
+from .generic import genericstore
+from .param import paramstore
+
+__all__ = ['datastore', 'modelstore', 'genericstore', 'paramstore']

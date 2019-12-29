@@ -1,13 +1,11 @@
-# TODO: best practices like utf8
-# TODO: is this separater enough - add test cases?
 SEP = '--_'
 PREFIX = '_STOCK'
 
 
-# ===================================================
-#         Metadata & Arrayset key parsers
-# ===================================================
-def metakey(model, name):
+# ===================================================================
+#         Metadata & Arrayset key parsers for model store
+# ===================================================================
+def model_metakey(model, name):
     return f"{PREFIX}{SEP}{model}{SEP}{name}"
 
 
@@ -19,14 +17,30 @@ def shapekey(name, longest):
     return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}{'shape'}"
 
 
-# ====================================================
-#         Metadata Value parsers
-# ====================================================
+# ===================================================================
+#                      Metadata Value parsers
+# ===================================================================
 
-# TODO: better names
-def encode(layers):
-    return ','.join(layers)
+def stringify(lst):
+    return ','.join(lst) if lst else ''
 
 
-def decode(string):
-    return string.split(',')
+def destringify(string):
+    return string.split(',') if string else ''
+
+
+# ===================================================================
+#                             Params key
+# ===================================================================
+
+
+def params_metakey(name):
+    return f"{PREFIX}{SEP}param{SEP}{name}"
+
+
+# ===================================================================
+#                            Generic key
+# ===================================================================
+
+def generic_metakey(name):
+    return f"{PREFIX}{SEP}generic{SEP}{name}"

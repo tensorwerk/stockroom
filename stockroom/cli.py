@@ -1,36 +1,31 @@
-from pathlib import Path
 import click
-from hangar import Repository
+import hangar
 from . import repository
 
 
-# TODO: move repetative code in hangar and here to a common function
-pass_repo = click.make_pass_decorator(Repository, ensure=True)
-
-
 @click.group(no_args_is_help=True, add_help_option=True, invoke_without_command=True)
-@click.pass_context
-def main(ctx):
-    cwd = Path.cwd()
-    ctx.obj = Repository(path=cwd, exists=False)
+def main():
+    """
+    Grouping all stockroom commands
+    """
+    pass
 
 
 @main.command()
 @click.option('--message', '-m', multiple=True,
               help=('The commit message. If provided multiple times '
                     'each argument gets converted into a new line.'))
-@pass_repo
-def commit(repo: Repository, message):
+def commit(message):
     """Commits outstanding changes.
 
     Commit changes to the given files into the repository. You will need to
     'push' to push up your changes to other repositories.
     """
-    from hangar.records.summarize import status
+    repo = repository.StockRepository()
     if not message:
         with repo.checkout(write=True) as co:
             diff = co.diff.staged()
-            status_txt = status(co.branch_name, diff.diff)
+            status_txt = hangar.records.summarize.status(co.branch_name, diff.diff)
             status_txt.seek(0)
             marker = '# Changes To Be committed: \n'
             hint = ['\n', '\n', marker, '# \n']
@@ -45,7 +40,6 @@ def commit(repo: Repository, message):
             if not msg:
                 click.echo('Aborted! Empty commit message')
                 return
-        # TODO: should be done in the __exit__ of hangar checkout
         co.close()
     else:
         msg = '\n'.join(message)
@@ -53,7 +47,7 @@ def commit(repo: Repository, message):
     try:
         digest = repository.commit(message)
     except (FileNotFoundError, RuntimeError) as e:
-        raise click.ClickException(e)
+        raise click.ClickException(e)  # type: ignore
     click.echo(f'Commit Successful. Digest: {digest}')
 
 
@@ -63,9 +57,13 @@ def commit(repo: Repository, message):
 @click.option('--overwrite', is_flag=True, default=False,
               help='overwrite a repository if it exists at the current path')
 def init(name, email, overwrite):
+    """
+    Init stockroom repository. A stockroom repository is a hangar repository plus
+    a head.stock file that tracks the commits.
+    """
     try:
         repository.init(name, email, overwrite)
     except RuntimeError as e:
-        raise click.ClickException(e)
+        raise click.ClickException(e)  # type: ignore
 
 

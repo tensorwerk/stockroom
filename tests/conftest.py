@@ -1,16 +1,23 @@
 from pathlib import Path
 import shutil
 import pytest
+import hangar
 import stockroom
-
-# TODO: restructure the core and monkey patch the repo creation at CWD
 
 
 @pytest.fixture()
-def repo():
+def managed_tmpdir(monkeypatch, tmp_path):
+    monkeypatch.setitem(hangar.constants.LMDB_SETTINGS, 'map_size', 2_000_000)
+    yield tmp_path
+    shutil.rmtree(tmp_path)
+
+
+@pytest.fixture()
+def repo(monkeypatch, managed_tmpdir):
+    cwd = Path(managed_tmpdir)
+    monkeypatch.setattr(Path, 'cwd', lambda: cwd)
+    cwd.joinpath(".git").mkdir()
+    cwd.joinpath(".gitignore").touch()
     yield stockroom.init('s', 'a@b.c', overwrite=True)
-    cwd = Path.cwd()
-    shutil.rmtree(cwd.joinpath('.hangar'))
-    cwd.joinpath('head.stock').unlink()
-
-
+    stockrepo = stockroom.repository.StockRepository()
+    stockrepo._teardown()
