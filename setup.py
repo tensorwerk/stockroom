@@ -39,7 +39,7 @@ setup(
     keywords='stockroom',
     name='stockroom',
     packages=find_packages(include=['stockroom', 'stockroom.*']),
-    url='https://github.com/hhsecond/stockroom',
+    url='https://github.com/tensorwerk/stockroom',
     version='0.1.0',
     zip_safe=False,
 )

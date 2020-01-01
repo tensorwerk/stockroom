@@ -1,6 +1,4 @@
 import pytest
-import torch
-import tensorflow as tf
 import numpy as np
 import stockroom
 from copy import deepcopy
@@ -10,6 +8,7 @@ class TestTFModelStore:
 
     @staticmethod
     def get_new_model():
+        import tensorflow as tf
         tf_model = tf.keras.models.Sequential([
             tf.keras.layers.Dense(3, activation='relu'),
             tf.keras.layers.Dense(1, activation='relu')
@@ -17,6 +16,7 @@ class TestTFModelStore:
         tf_model.build((5, 2))
         return tf_model
 
+    @pytest.mark.filterwarnings('ignore:the imp module is deprecated:DeprecationWarning')
     def test_saving_tf(self, repo):
         modelstore = stockroom.modelstore(write=True)
 
@@ -41,6 +41,7 @@ class TestTorchModelStore:
 
     @staticmethod
     def get_new_model():
+        import torch
         torch_model = torch.nn.Sequential(
             torch.nn.Linear(2, 3),
             torch.nn.ReLU(),
@@ -70,6 +71,7 @@ class TestTorchModelStore:
             modelstore.save('torch_model', torch_model)
 
     def test_load_with_different_library_version(self, repo, monkeypatch):
+        import torch
         modelstore = stockroom.modelstore(write=True)
         torch_model = self.get_new_model()
         modelstore.save('thm', torch_model)

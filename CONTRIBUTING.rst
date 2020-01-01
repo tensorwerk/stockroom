@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/hhsecond/stockroom/issues.
+Report bugs at https://github.com/tensorwerk/stockroom/issues.
 
 If you are reporting a bug, please include:
 
@@ -45,7 +45,7 @@ articles, and such.
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/hhsecond/stockroom/issues.
+The best way to send feedback is to file an issue at https://github.com/tensorwerk/stockroom/issues.
 
 If you are proposing a feature:
 
@@ -80,7 +80,6 @@ Ready to contribute? Here's how to set up `stockroom` for local development.
    tests, including testing other Python versions with tox::
 
     $ flake8 stockroom tests
-    $ python setup.py test or pytest
     $ tox
 
    To get flake8 and tox, just pip install them into your virtualenv.
@@ -102,27 +101,6 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.5, 3.6, 3.7 and 3.8, and for PyPy. Check
-   https://travis-ci.org/hhsecond/stockroom/pull_requests
+3. The pull request should work for Python 3.6, 3.7 and 3.8. Check
+   https://travis-ci.org/tensorwerk/stockroom/pull_requests
    and make sure that the tests pass for all supported Python versions.
-
-Tips
-----
-
-To run a subset of tests::
-
-$ pytest tests.test_stockroom
-
-
-Deploying
----------
-
-A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
-Then run::
-
-$ bump2version patch # possible: major / minor / patch
-$ git push
-$ git push --tags
-
-Travis will then deploy to PyPI if tests pass.

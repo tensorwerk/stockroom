@@ -13,13 +13,17 @@ class ParamStore:
             raise TypeError("ParamStore accepts only numbers as input")
         co = self._repo.checkout(write=True)
         # TODO: Perhaps a hangar backend that could take int, float, string
-        co.metadata[parser.params_metakey(key)] = str(value)
-        co.close()
+        try:
+            co.metadata[parser.params_metakey(key)] = str(value)
+        finally:
+            co.close()
 
     def load(self, key):
-        co = self._repo.checkout()
-        ret = co.metadata[parser.params_metakey(key)]
-        co.close()
+        co = self._repo.checkout(write=self._write)
+        try:
+            ret = co.metadata[parser.params_metakey(key)]
+        finally:
+            co.close()
         return float(ret)
 
 

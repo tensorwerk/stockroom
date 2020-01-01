@@ -9,7 +9,8 @@ def datastore(write=False):
     :param write: bool, write enabled checkout or not
     """
     repo = StockRepository()
-    return repo.checkout(write=write)
+    co = repo.checkout(write=write)
+    return co.arraysets
 
 
 

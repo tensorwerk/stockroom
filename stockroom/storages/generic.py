@@ -16,13 +16,17 @@ class GenericStore:
 
     def save(self, key, value):
         co = self._repo.checkout(write=True)
-        co.metadata[parser.generic_metakey(key)] = value
-        co.close()
+        try:
+            co.metadata[parser.generic_metakey(key)] = value
+        finally:
+            co.close()
 
     def load(self, key):
-        co = self._repo.checkout()
-        value = co.metadata[parser.generic_metakey(key)]
-        co.close()
+        co = self._repo.checkout(write=self._write)
+        try:
+            value = co.metadata[parser.generic_metakey(key)]
+        finally:
+            co.close()
         return value
 
 

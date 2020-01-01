@@ -49,8 +49,10 @@ class TestCommit:
         read_gs = stockroom.genericstore()
         assert read_gs.load("key1") == 'value'
         genericstore.save('key2', 'value2')
+        assert genericstore.load('key2') == 'value2'
+        read_gs = stockroom.genericstore()
         with pytest.raises(KeyError):
-            genericstore.load('key2')
+            read_gs.load('key2')
 
     def test_commit_hash(self, repo):
         genericstore = stockroom.genericstore(write=True)

@@ -20,4 +20,7 @@ def repo(monkeypatch, managed_tmpdir):
     cwd.joinpath(".gitignore").touch()
     yield stockroom.init('s', 'a@b.c', overwrite=True)
     stockrepo = stockroom.repository.StockRepository()
-    stockrepo._teardown()
+    stockrepo._hangar_repo._env._close_environments()
+    stockrepo._root = None
+    stockrepo._hangar_repo = None
+
