@@ -2,7 +2,8 @@ from pathlib import Path
 import shutil
 import pytest
 import hangar
-import stockroom
+import numpy as np
+from stockroom import init_repo
 
 
 @pytest.fixture()
@@ -18,9 +19,17 @@ def repo(monkeypatch, managed_tmpdir):
     monkeypatch.setattr(Path, 'cwd', lambda: cwd)
     cwd.joinpath(".git").mkdir()
     cwd.joinpath(".gitignore").touch()
-    yield stockroom.init('s', 'a@b.c', overwrite=True)
-    stockrepo = stockroom.repository.StockRepository()
-    stockrepo._hangar_repo._env._close_environments()
-    stockrepo._root = None
-    stockrepo._hangar_repo = None
+    yield init_repo('s', 'a@b.c', overwrite=True)
+
+
+@pytest.fixture()
+def repo_with_aset(repo):
+    repo = hangar.Repository(Path.cwd())
+    co = repo.checkout(write=True)
+    arr = np.arange(20).reshape(4, 5)
+    co.arraysets.init_arrayset('aset', prototype=arr)
+    co.commit('init aset')
+    co.close()
+    yield None
+
 

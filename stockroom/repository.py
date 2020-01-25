@@ -1,7 +1,6 @@
-from typing import Union
 from pathlib import Path
 from hangar import Repository
-from .utils import get_stock_root, get_current_head, set_current_head
+from .utils import get_current_head
 
 
 class StockRepository:
@@ -16,13 +15,9 @@ class StockRepository:
     and the .git folder
     """
 
-    def __init__(self, root=None):
-        if root is None:
-            root = get_stock_root(Path.cwd())
-        self._root: Union[Path, None] = root
+    def __init__(self, root):
+        self._root: Path = root
         self._hangar_repo = Repository(root)
-        if not self._hangar_repo.initialized:
-            raise RuntimeError("Repository has not been initialized")
 
     def checkout(self, write=False):
         """An api similar to hangar checkout but creates the checkout object using the
@@ -48,7 +43,7 @@ class StockRepository:
 
 # ================================== User facing Repository functions ================================
 
-def init(name=None, email=None, overwrite=False):
+def init_repo(name=None, email=None, overwrite=False):
     """ init hangar repo, create stock file and add details to .gitignore """
     if not Path.cwd().joinpath('.git').exists():
         raise RuntimeError("stock init should execute only in a"
@@ -76,18 +71,3 @@ def init(name=None, email=None, overwrite=False):
         f.seek(0)
         if '.hangar' not in f.read():
             f.write('\n# hangar artifacts\n.hangar\n')
-
-
-def commit(message):
-    """
-    Make a stock commit. A stock commit is a hangar commit plus writing the
-    commit hash to the stock file. This function opens the stock checkout in
-    write mode and close after the commit. Which means, no other write
-    operations should be running while stock commit is in progress
-    """
-    repo = StockRepository()
-    with repo.checkout(write=True) as co:
-        digest = co.commit(message)
-    co.close()
-    set_current_head(repo.stockroot, digest)
-    return digest

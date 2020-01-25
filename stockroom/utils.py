@@ -4,7 +4,7 @@ import importlib
 from pathlib import Path
 
 
-def get_stock_root(path: Path) -> Union[Path, None]:
+def get_stock_root(path: Path) -> Path:
     """
     Traverse from given path up till root of the system to figure out the root of
     the stockroom repo. A stockroom repo must be hangar repo, a git repo and must
@@ -25,7 +25,8 @@ def get_stock_root(path: Path) -> Union[Path, None]:
                                    "hangar repository")
             return path
         if path == path.parent:  # system root check
-            return None
+            raise RuntimeError("Could not find stock root. Are you in a "
+                               "stock repository")
         path = path.parent
 
 

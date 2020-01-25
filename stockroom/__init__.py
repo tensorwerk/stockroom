@@ -1,9 +1,5 @@
-from .storages import datastore
-from .storages import modelstore
-from .storages import paramstore
-from .storages import genericstore
-from .repository import init, commit
+from .main import StockRoom
+from .repository import init_repo
 
-
-__all__ = ['datastore', 'modelstore', 'paramstore', 'genericstore', 'init', 'commit']
+__all__ = ['StockRoom', 'init_repo']
 __version__ = '0.1.0'

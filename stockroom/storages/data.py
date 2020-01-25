@@ -1,17 +1,19 @@
-from ..repository import StockRepository
 
+class Data:
+    def __init__(self, repo):
+        self._repo = repo
 
-def datastore(write=False):
-    """
-    Returns a hangar dataset object (checkout object). The rationale here
-    is to keep the datastore APIs similar to what hangar already has
+    def __setitem__(self, key, value):
+        co = self._repo.checkout(write=True)
+        try:
+            co[key] = value
+        finally:
+            co.close()
 
-    :param write: bool, write enabled checkout or not
-    """
-    repo = StockRepository()
-    co = repo.checkout(write=write)
-    return co.arraysets
-
-
-
-
+    def __getitem__(self, item):
+        co = self._repo.checkout()
+        try:
+            value = co[item]
+            return value
+        finally:
+            co.close()
