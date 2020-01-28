@@ -27,13 +27,35 @@ Introduction
 ------------
 A platform to version models, data, parameters, metrics etc alongside git
 versioned source code.
-Althouh it is built as a high level API kit for `hangar
-<https://github.com/tensorwerk/hangar-py>`_ and comes as part of hangar
-itself, user doesn't need to know any founding philosophy of hangar work with
-stockroom unless you need fine grained control. Stockroom is currently in it's
-first ever release. It doesn't have an exhaustive test suite, although it should
-work on any platform, we have tested it only on linux so far and the APIs could
-change in backward incompatible way (for good). But the underlying idea of the
-existence of stockroom is
-- Ease the storage and versioning of data, model, hyper parameters and even metadata related to a specific run
-- Make it work with git and hence avoid the steep learning curve but at the same time make sure you are not paying for the performance which you would if you are relying only on git for data storage
+Stockroom exists for three reasons
+- Work hand-in-hand with git
+The git is probably the most prominent version controlling tool available in the market
+that is being prevalent in the developers community. The advantage we get by making
+stockroom work alongside git is that there is no new things to learn about versioning
+your data.
+- Simplify `hangar <https://github.com/tensorwerk/hangar-py>`_ APIs
+Hangar is a really big tool that tries to serve all the need of data storage and
+versioning in the deep learning/machine learning space without compromising the speed.
+Essentially trying to do what git did for source code but for data. For achieving this,
+along with the flexibility, hangar introduces a bunch of APIs. But by making it work
+alongside git had a good side effect in simplifying these APIs.
+- Make storage of model + data + params and versioning them possible in`hangar
+<https://github.com/tensorwerk/hangar-py>`_
+
+Even though stockroom is built on top of hangar, user doesn't need to understand hangar
+to work with stockroom. Stockroom works like a normal python dictionary where user can
+store data to and retrieve data from. Stockroom is currently in it's first ever release.
+It doesn't have an exhaustive test suite and the APIs could change in backward
+incompatible way (for good).
+
+Example
+=======
+.. code-block:: python
+
+    from stockroom import StockRoom
+    import numpy as np
+
+    stock = StockRoom()
+    stock.data['sample1'] = np.random.random((3, 28, 28))
+
+Checkout the `documentation <https://stockroom.readthedocs.io/en/latest/>`_ to learn more

@@ -19,7 +19,8 @@ def repo(monkeypatch, managed_tmpdir):
     monkeypatch.setattr(Path, 'cwd', lambda: cwd)
     cwd.joinpath(".git").mkdir()
     cwd.joinpath(".gitignore").touch()
-    yield init_repo('s', 'a@b.c', overwrite=True)
+    init_repo('s', 'a@b.c', overwrite=True)
+    yield None
 
 
 @pytest.fixture()

@@ -1,9 +1,20 @@
 from pathlib import Path
+from contextlib import contextmanager
+
 from hangar import Repository
 from .utils import get_current_head
 
 
-class StockRepository:
+class RootTracker(type):
+    _instances = {}
+
+    def __call__(cls, root, *args, **kwargs):
+        if root not in cls._instances:
+            cls._instances[root] = super().__call__(root, *args, **kwargs)
+        return cls._instances[root]
+
+
+class StockRepository(metaclass=RootTracker):
     """
     A StockRoom wrapper class for hangar repo operations. Every hangar repo
     interactions that is being done through stockroom (other than stock init)
@@ -16,9 +27,34 @@ class StockRepository:
     """
 
     def __init__(self, root):
-        self._root: Path = root
+        self._root = root
         self._hangar_repo = Repository(root)
+        self._optimized_Rcheckout = None
+        self._optimized_Wcheckout = None
+        self._has_optimized = False
 
+    @property
+    def hangar_repository(self):
+        return self._hangar_repo
+
+    def enable_optimized_checkout(self):
+        head_commit = get_current_head(self._root)
+        self._optimized_Rcheckout = self._hangar_repo.checkout(commit=head_commit)
+        self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
+        self._optimized_Wcheckout.__enter__()
+        self._optimized_Rcheckout.__enter__()
+        self._has_optimized = True
+
+    def disable_optimized_checkout(self):
+        self._optimized_Wcheckout.__exit__()
+        self._optimized_Rcheckout.__exit__()
+        self._optimized_Wcheckout.close()
+        self._optimized_Rcheckout.close()
+        self._optimized_Wcheckout = None
+        self._optimized_Rcheckout = None
+        self._has_optimized = False
+
+    @contextmanager
     def checkout(self, write=False):
         """An api similar to hangar checkout but creates the checkout object using the
         commit hash from stock file instead of user supplying one. This enables users
@@ -27,14 +63,24 @@ class StockRepository:
         :param write: bool, write enabled checkout or not
         """
         if write:
-            if self._hangar_repo.writer_lock_held:
-                raise PermissionError("Another write operation is in progress. "
-                                      "Could not acquire the lock")
-            co = self._hangar_repo.checkout(write=True)
+            if self._has_optimized:
+                co = self._optimized_Wcheckout
+            else:
+                if self._hangar_repo.writer_lock_held:
+                    raise PermissionError("Another write operation is in progress. "
+                                          "Could not acquire the lock")
+                co = self._hangar_repo.checkout(write=True)
         else:
-            head_commit = get_current_head(self._root)
-            co = self._hangar_repo.checkout(commit=head_commit)
-        return co
+            if self._has_optimized:
+                co = self._optimized_Rcheckout
+            else:
+                head_commit = get_current_head(self._root)
+                co = self._hangar_repo.checkout(commit=head_commit)
+        try:
+            yield co
+        finally:
+            if not self._has_optimized:
+                co.close()
     
     @property
     def stockroot(self):

@@ -13,8 +13,8 @@ def modelkey(name, longest, dtype):
     return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}{dtype}"
 
 
-def shapekey(name, longest):
-    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}{'shape'}"
+def model_shapekey(name, longest):
+    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}shape"
 
 
 # ===================================================================
@@ -30,17 +30,12 @@ def destringify(string):
 
 
 # ===================================================================
-#                             Params key
+#                            Tag keys
 # ===================================================================
 
+def tagkey(name):
+    return f"{PREFIX}{SEP}tag{SEP}{name}"
 
-def params_metakey(name):
-    return f"{PREFIX}{SEP}param{SEP}{name}"
 
-
-# ===================================================================
-#                            Generic key
-# ===================================================================
-
-def generic_metakey(name):
-    return f"{PREFIX}{SEP}generic{SEP}{name}"
+def tag_typekey(name):
+    return f"{PREFIX}{SEP}{name}{SEP}tag{SEP}type"

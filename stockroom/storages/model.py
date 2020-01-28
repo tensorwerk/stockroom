@@ -40,8 +40,7 @@ class Model:
         longest = max([len(x.reshape(-1)) for x in weights])
         dtypes = [w.dtype.name for w in weights]
 
-        co = self._repo.checkout(write=True)
-        try:
+        with self._repo.checkout(write=True) as co:
             co.metadata[parser.model_metakey(name, 'library')] = library
             co.metadata[parser.model_metakey(name, 'libraryVersion')] = library_version
             co.metadata[parser.model_metakey(name, 'longest')] = str(longest)
@@ -51,7 +50,7 @@ class Model:
 
             # ---------- Create arraysets if not exist -----------------
 
-            shapeKey = parser.shapekey(name, str(longest))
+            shapeKey = parser.model_shapekey(name, str(longest))
             if shapeKey not in co.arraysets.keys():
                 co.arraysets.init_arrayset(shapeKey, 10, np.int64, variable_shape=True)
             for i, w in enumerate(weights):
@@ -71,13 +70,10 @@ class Model:
                         shape_aset[i] = np.array(w.shape)
                     else:
                         shape_aset[i] = np.array(()).astype('int64')
-        finally:
-            co.close()
 
     def __getitem__(self, name):
         # TODO: This will not read from stg
-        co = self._repo.checkout()
-        try:
+        with self._repo.checkout() as co:
             try:
                 library = co.metadata[parser.model_metakey(name, 'library')]
             except KeyError:
@@ -88,7 +84,7 @@ class Model:
             num_layers = int(co.metadata[parser.model_metakey(name, 'numLayers')])
             layers = parser.destringify(co.metadata[parser.model_metakey(name, 'layers')])
 
-            shapeKey = parser.shapekey(name, longest)
+            shapeKey = parser.model_shapekey(name, longest)
             shape_aset = co.arraysets[shapeKey]
             weights = []
             for i in range(num_layers):
@@ -109,8 +105,6 @@ class Model:
                                   f"({library_version}) is not same as the one installed "
                                   f"in the current environment. i.e {tf.__version__}")
                 return weights
-        finally:
-            co.close()
 
     def save_weights(self, name, model):
         """

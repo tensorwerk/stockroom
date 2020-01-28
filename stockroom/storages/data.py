@@ -4,16 +4,9 @@ class Data:
         self._repo = repo
 
     def __setitem__(self, key, value):
-        co = self._repo.checkout(write=True)
-        try:
+        with self._repo.checkout(write=True) as co:
             co[key] = value
-        finally:
-            co.close()
 
-    def __getitem__(self, item):
-        co = self._repo.checkout()
-        try:
-            value = co[item]
-            return value
-        finally:
-            co.close()
+    def __getitem__(self, key):
+        with self._repo.checkout() as co:
+            return co[key]

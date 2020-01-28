@@ -1,5 +1,6 @@
 from typing import Union
 from pathlib import Path
+from contextlib import contextmanager
 
 from .repository import StockRepository
 from .storages import Model, Data, Tag
@@ -15,6 +16,18 @@ class StockRoom:
         self.data = Data(self._repo)
         self.tag = Tag(self._repo)
 
+    @property
+    def get_hangar_checkout(self, write=False):
+        return self._repo.hangar_repository.checkout(write=write)
+
+    @contextmanager
+    def optimize(self):
+        try:
+            self._repo.enable_optimized_checkout()
+            yield None
+        finally:
+            self._repo.disable_optimized_checkout()
+
     def commit(self, message: str):
         """
         Make a stock commit. A stock commit is a hangar commit plus writing the
@@ -24,6 +37,5 @@ class StockRoom:
         """
         with self._repo.checkout(write=True) as co:
             digest = co.commit(message)
-        co.close()
         set_current_head(self._repo.stockroot, digest)
         return digest
