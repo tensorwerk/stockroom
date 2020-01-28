@@ -21,6 +21,8 @@ def repo(monkeypatch, managed_tmpdir):
     cwd.joinpath(".gitignore").touch()
     init_repo('s', 'a@b.c', overwrite=True)
     yield None
+    repo = hangar.Repository(Path.cwd())
+    repo._env._close_environments()
 
 
 @pytest.fixture()
@@ -32,5 +34,4 @@ def repo_with_aset(repo):
     co.commit('init aset')
     co.close()
     yield None
-
-
+    repo._env._close_environments()

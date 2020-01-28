@@ -90,3 +90,4 @@ class TestTorchModelStore:
         with pytest.raises(KeyError) as error:
             stock.model.load_weights('wrongname', thm)
         assert 'Model with key wrongname not found' == error.value.args[0]
+        stock._repo._hangar_repo._env._close_environments()

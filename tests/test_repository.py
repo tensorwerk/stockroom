@@ -48,7 +48,8 @@ class TestCommit:
         stock.commit('generic data')
         assert stock.tag['key1'] == 'value'
         stock.tag['key2'] = 'value2'
-        assert stock.tag['key2'] == 'value2'
+        with pytest.raises(KeyError):
+            stock.tag['key2']
 
     def test_commit_hash(self, repo):
         stock = StockRoom()

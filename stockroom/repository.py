@@ -46,13 +46,13 @@ class StockRepository(metaclass=RootTracker):
         self._has_optimized = True
 
     def disable_optimized_checkout(self):
+        self._has_optimized = False
         self._optimized_Wcheckout.__exit__()
         self._optimized_Rcheckout.__exit__()
         self._optimized_Wcheckout.close()
         self._optimized_Rcheckout.close()
         self._optimized_Wcheckout = None
         self._optimized_Rcheckout = None
-        self._has_optimized = False
 
     @contextmanager
     def checkout(self, write=False):
