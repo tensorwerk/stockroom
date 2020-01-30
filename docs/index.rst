@@ -7,11 +7,11 @@ Welcome to stockroom's documentation!
 
    readme
    installation
-   usage
-   modules
-   contributing
+   api
+   cli
+   tutorial
    authors
-   history
+   changelog
 
 Indices and tables
 ==================

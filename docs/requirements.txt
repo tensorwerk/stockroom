@@ -1,7 +1,5 @@
 sphinx>=1.3
-sphinx-rtd-theme
 sphinx-click
 nbsphinx
-recommonmark
-IPython
+sphinx_rtd_theme
 -e .

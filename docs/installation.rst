@@ -1,12 +1,6 @@
-.. highlight:: shell
-
 ============
 Installation
 ============
-
-
-Stable release
---------------
 
 To install stockroom, run this command in your terminal:
 
@@ -14,38 +8,24 @@ To install stockroom, run this command in your terminal:
 
     $ pip install stockroom
 
-This is the preferred method to install stockroom, as it will always install the most recent stable release.
+This is the preferred method to install stockroom, as it will always install the most
+recent stable release.
 
-If you don't have `pip`_ installed, this `Python installation guide`_ can guide
-you through the process.
-
-.. _pip: https://pip.pypa.io
-.. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
-
-
-From sources
-------------
-
-The sources for stockroom can be downloaded from the `Github repo`_.
-
-You can either clone the public repository:
+The source for stockroom can be downloaded from the `Github repo`_. Below code block
+shows how to install stockroom from source.
 
 .. code-block:: console
 
     $ git clone git://github.com/hhsecond/stockroom
-
-Or download the `tarball`_:
-
-.. code-block:: console
-
-    $ curl -OJL https://github.com/hhsecond/stockroom/tarball/master
-
-Once you have a copy of the source, you can install it with:
-
-.. code-block:: console
-
+    $ cd stockroom
     $ python setup.py install
 
+But if you are planning to contribute to stockroom, you might want to install stockroom
+in development mode which enables you to test the changes you make easily. Installing
+in development mode is possible with a slight tweak in the above commands
+
+.. code-block:: console
+
+    $ python setup.py develop
 
 .. _Github repo: https://github.com/hhsecond/stockroom
-.. _tarball: https://github.com/hhsecond/stockroom/tarball/master

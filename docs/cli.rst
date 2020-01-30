@@ -1,4 +1,4 @@
-.. _ref-cli
+.. _ref-cli:
 
 The stock CLI
 =============
