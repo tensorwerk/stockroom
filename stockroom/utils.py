@@ -1,4 +1,3 @@
-from typing import Union
 import types
 import importlib
 from pathlib import Path
@@ -6,14 +5,20 @@ from pathlib import Path
 
 def get_stock_root(path: Path) -> Path:
     """
-    Traverse from given path up till root of the system to figure out the root of
-    the stockroom repo. A stockroom repo must be hangar repo, a git repo and must
-    have a head.stock file. The head.stock file tracks the current commit hash and
-    is git tracked. This gives the user the ability to manage the checkout using
-    git.
+    Traverse from given path up till root of the system to figure out the root of the
+    stock repo. A stock repo must be hangar repo, a git repo and must have a head.stock
+    file. The head.stock file has the information required for stockroom to manage
+    checkout, branching etc and it is git tracked.
 
-    :param path: Path from which stock root check starts
-    :return: A pathlib.Path instance or ``None`` if stockroot is not found
+    Parameters
+    ----------
+    path : Path
+        path from which stock root check starts
+
+    Returns
+    -------
+    Path
+        Location of root of stock repo
     """
     while True:
         stock_exist = path.joinpath('head.stock').exists()
@@ -34,8 +39,15 @@ def get_current_head(root: Path) -> str:
     """
     Reads the stock file and return the commit hash if found
 
-    :param root: The stock root path
-    :return: commit hash if found. Empty string other wises
+    Parameters
+    ----------
+    root : Path
+        The stock root path
+
+    Returns
+    -------
+    str
+        commit hash if found. Empty string other wises
     """
     with open(root/'head.stock', 'r') as f:
         commit = f.read()
@@ -46,15 +58,21 @@ def set_current_head(root: Path, commit: str):
     """
     Write a commit hash to the stock file.
 
-    :param root: The stock root path
-    :param commit: Commit hash
+    Parameters
+    ----------
+    root : Path
+        The stock root path
+    commit : str
+        Commit hash that will be written to the stock file
     """
     with open(root/'head.stock', 'w+') as f:
         f.write(commit)
 
 
 class LazyLoader(types.ModuleType):
-    """Lazily import a module, mainly to avoid pulling in large dependencies."""
+    """
+    Lazily import a module, mainly to avoid pulling in large dependencies
+    """
 
     def __init__(self, local_name, parent_module_globals, name):
         self._local_name = local_name

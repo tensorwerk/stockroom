@@ -36,6 +36,7 @@ import stockroom
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
     'nbsphinx',
     'sphinx_click.ext',
 ]

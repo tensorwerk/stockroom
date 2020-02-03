@@ -6,6 +6,14 @@ from .utils import get_current_head
 
 
 class RootTracker(type):
+    """
+    A metaclass that make sure singleton-like implementation restricted on repository
+    path. This class checks for the repository path and returns the instance of
+    :class:`StorckRepository` for that path if exists. A path based singleton is
+    essential since we need the ability to open one write checkout for each repository
+    and make sure no another attempt to open the write checkout for the same repository
+    triggers from stockroom.
+    """
     _instances = {}
 
     def __call__(cls, root, *args, **kwargs):
@@ -16,14 +24,12 @@ class RootTracker(type):
 
 class StockRepository(metaclass=RootTracker):
     """
-    A StockRoom wrapper class for hangar repo operations. Every hangar repo
-    interactions that is being done through stockroom (other than stock init)
-    should go through this class. Unlike hangar Repository, this class constructor
-    assumes the hangar repo is already initialized. Hangar will make sure there are
-    only one writer class active always.
-    The constructor creates the hangar repo object on instantiation while it assumes
-    that the hangar repo is already initialized and expect the presence of stock file
-    and the .git folder
+    A StockRoom wrapper class for hangar repo operations. Every hangar repo interactions
+    that is being done through stockroom (other than stock init) should go through the
+    checkout created from this class. Unlike hangar Repository, this class constructor
+    assumes the hangar repo is already initialized. Hangar will make sure there are only
+    one writer class active always. The constructor creates the hangar repo object on
+    instantiation.
     """
 
     def __init__(self, root):
@@ -37,7 +43,7 @@ class StockRepository(metaclass=RootTracker):
     def hangar_repository(self):
         return self._hangar_repo
 
-    def enable_optimized_checkout(self):
+    def open_global_checkout(self):
         head_commit = get_current_head(self._root)
         self._optimized_Rcheckout = self._hangar_repo.checkout(commit=head_commit)
         self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
@@ -45,7 +51,7 @@ class StockRepository(metaclass=RootTracker):
         self._optimized_Rcheckout.__enter__()
         self._has_optimized = True
 
-    def disable_optimized_checkout(self):
+    def close_global_checkout(self):
         self._has_optimized = False
         self._optimized_Wcheckout.__exit__()
         self._optimized_Rcheckout.__exit__()
@@ -56,11 +62,14 @@ class StockRepository(metaclass=RootTracker):
 
     @contextmanager
     def checkout(self, write=False):
-        """An api similar to hangar checkout but creates the checkout object using the
+        """
+        An api similar to hangar checkout but creates the checkout object using the
         commit hash from stock file instead of user supplying one. This enables users
-        to rely on git checkout for hangar checkout as well
-
-        :param write: bool, write enabled checkout or not
+        to rely on git checkout for hangar checkout as well. This checkout is being
+        designed as a context manager that makes sure the checkout is closed. On entry
+        and exit, the CM checks the existence of a global checkout. On entry, ff global
+        checkout exists, it returns the that instead of creating a new checkout. On exit,
+        it doesn't close in case of global checkout instead it lets the CM do the closure
         """
         if write:
             if self._has_optimized:
@@ -83,7 +92,10 @@ class StockRepository(metaclass=RootTracker):
                 co.close()
     
     @property
-    def stockroot(self):
+    def stockroot(self) -> Path:
+        """
+        Returns the root of stock repository
+        """
         return self._root
 
 
@@ -96,7 +108,7 @@ def init_repo(name=None, email=None, overwrite=False):
                            " git repository. Try running stock "
                            "init after git init")
     repo = Repository(Path.cwd(), exists=False)
-    if repo.initialized and (not overwrite):
+    if not overwrite and repo.initialized:
         commit_hash = repo.log(return_contents=True)['head']
         print(f'Hangar Repo already exists at {repo.path}. '
               f'Initializing it as stock repository')

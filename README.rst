@@ -1,5 +1,5 @@
 =========
-stockroom
+Stockroom
 =========
 
 
@@ -15,38 +15,41 @@ stockroom
 
 
 
-
-A hangar wrapper that enables the versioning of model, params and metrics along
-with data
-
-
-* Free software: Apache Software License 2.0
-* Documentation: https://stockroom.readthedocs.io.
+Stockroom is a platform to version models, data, parameters, metrics etc. alongside git
+versioned source code. It is licensed as a Free software under
+**Apache Software License 2.0**
 
 Introduction
 ------------
-A platform to version models, data, parameters, metrics etc alongside git
-versioned source code.
-Stockroom exists for three reasons
-- Work hand-in-hand with git
-The git is probably the most prominent version controlling tool available in the market
-that is being prevalent in the developers community. The advantage we get by making
-stockroom work alongside git is that there is no new things to learn about versioning
-your data.
-- Simplify `hangar <https://github.com/tensorwerk/hangar-py>`_ APIs
-Hangar is a really big tool that tries to serve all the need of data storage and
-versioning in the deep learning/machine learning space without compromising the speed.
-Essentially trying to do what git did for source code but for data. For achieving this,
-along with the flexibility, hangar introduces a bunch of APIs. But by making it work
-alongside git had a good side effect in simplifying these APIs.
-- Make storage of model + data + params and versioning them possible in`hangar
-<https://github.com/tensorwerk/hangar-py>`_
+Stockroom is built on top of `hangar <https://github.com/tensorwerk/hangar-py>`_ and hence
+is high performant but with a minimal and simple set of APIs. We tried to reduce the
+cognitive overload as much as possible for a new user to get started. But the price you
+pay for that is compromise on the fine granularity you'd have if you use hangar directly.
+Even though the core of stockroom hangar itself and follows the hangar data philosophy
+implicitly, user doesn't need to know anything about hangar to use stockroom. Stockroom
+works like a python dictionary where user can store data to and retrieve data from.
+Stockroom is currently in it's first ever release. It doesn't have an exhaustive test
+suite and the APIs could change in backward incompatible way (for good).
 
-Even though stockroom is built on top of hangar, user doesn't need to understand hangar
-to work with stockroom. Stockroom works like a normal python dictionary where user can
-store data to and retrieve data from. Stockroom is currently in it's first ever release.
-It doesn't have an exhaustive test suite and the APIs could change in backward
-incompatible way (for good).
+Stockroom exists for three reasons
+
+- Work hand-in-hand with git:
+
+Stockroom let git does ``checkout`` and rely on that to move between branches/commits.
+This allows stockroom to present a very simple and intuitive API collection to the user
+while avoiding the need of user learning another set of commands otherwise they'd need.
+
+- Simplify `hangar <https://github.com/tensorwerk/hangar-py>`_ APIs:
+
+Hangar is an extensive and reliable tool that allows users to have fine grained control
+for storing and versioning data without compromising the speed and efficiency.
+Essentially trying to do what git did for source code but for data. But the set of APIs
+hangar provides are also extensive and can be cut short if we can delegate few tasks to
+git and make certain assumptions. And that's exactly what stockroom does
+
+- Make storage of model + data + params + metrics and versioning them possible in `hangar <https://github.com/tensorwerk/hangar-py>`_
+
+
 
 Example
 =======
@@ -58,4 +61,3 @@ Example
     stock = StockRoom()
     stock.data['sample1'] = np.random.random((3, 28, 28))
 
-Checkout the `documentation <https://stockroom.readthedocs.io/en/latest/>`_ to learn more
