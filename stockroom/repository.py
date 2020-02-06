@@ -1,7 +1,6 @@
 from pathlib import Path
 from contextlib import contextmanager
 
-import lmdb
 from hangar import Repository
 from .utils import get_current_head
 
@@ -19,11 +18,6 @@ class RootTracker(type):
 
     def __call__(cls, root, *args, **kwargs):
         if root not in cls._instances:
-            cls._instances[root] = super().__call__(root, *args, **kwargs)
-        try:
-            # TODO: there should be a better way to test whether the envs are closed
-            cls._instances[root].hangar_repository._env.refenv.stat()
-        except lmdb.Error:
             cls._instances[root] = super().__call__(root, *args, **kwargs)
         return cls._instances[root]
 

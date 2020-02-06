@@ -23,7 +23,7 @@ class StockRoom:
     Parameters
     ----------
     path : Union[str, Path, None]
-        Path the to the stock repository. If None, it traverse up from `pwd` till it
+        Path the to the stock repository. If `None`, it traverse up from `pwd` till it
         finds the stock root (stock root is the location where `head.stock` file is
         located and ideally will have `.git` folder as well
 
@@ -37,10 +37,10 @@ class StockRoom:
     3. a stock repository (has head.stock file)
 
     If you'd like to skip these checks and just use stockroom (for example: if you are a
-    hangar user and use stockroom just for storing models in your hangar repository, you
-    don't necessarily need it to be a stock repository and hence can skip these checks),
-    provide the path to the repository explicitly. The rationale here is, if you provide
-    the path, we trust you that you know what you doing on that path
+    hangar user and use stockroom just for storing models in your hangar repository, it
+    doesn't need to be a stock repository and hence can skip these checks), provide the
+    path to the repository explicitly. The rationale here is, if you provide the path, we
+    trust you that you know what you doing on that path
     """
     def __init__(self, path: Union[str, Path, None] = None):
         self.path = Path(path) if path else get_stock_root(Path.cwd())

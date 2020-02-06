@@ -4,12 +4,20 @@ import pytest
 import hangar
 import numpy as np
 import lmdb
+import stockroom.repository
 from stockroom import init_repo, StockRoom
 
 
 @pytest.fixture()
 def managed_tmpdir(monkeypatch, tmp_path):
     monkeypatch.setitem(hangar.constants.LMDB_SETTINGS, 'map_size', 2_000_000)
+    monkeypatch.setitem(hangar.constants.LMDB_SETTINGS, 'map_size', 2_000_000)
+    monkeypatch.setattr(hangar.backends.hdf5_00, 'COLLECTION_COUNT', 10)
+    monkeypatch.setattr(hangar.backends.hdf5_00, 'COLLECTION_SIZE', 50)
+    monkeypatch.setattr(hangar.backends.hdf5_01, 'COLLECTION_COUNT', 10)
+    monkeypatch.setattr(hangar.backends.hdf5_01, 'COLLECTION_SIZE', 50)
+    monkeypatch.setattr(hangar.backends.numpy_10, 'COLLECTION_SIZE', 50)
+    stockroom.repository.RootTracker._instances = {}
     yield tmp_path
     shutil.rmtree(tmp_path)
 

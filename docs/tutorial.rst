@@ -9,4 +9,3 @@ Tutorial
    :titlesonly:
 
    with-git
-   with-hangar

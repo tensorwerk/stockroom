@@ -1,0 +1,6 @@
+jupyter
+notebook
+jupyterlab
+stockroom
+google_images_download
+PILLOW

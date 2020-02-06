@@ -23,14 +23,15 @@ Introduction
 ------------
 Stockroom is built on top of `hangar <https://github.com/tensorwerk/hangar-py>`_ and hence
 is high performant but with a minimal and simple set of APIs. We tried to reduce the
-cognitive overload as much as possible for a new user to get started. But the price you
-pay for that is compromise on the fine granularity you'd have if you use hangar directly.
-Even though the core of stockroom hangar itself and follows the hangar data philosophy
-implicitly, user doesn't need to know anything about hangar to use stockroom. Stockroom
-works like a python dictionary where user can store data to and retrieve data from.
+cognitive overload as much as possible for a new user to get started. So stockroom is not
+exactly a wrapper that blinds you from the internal hangar philosophy but it's a tool
+that enables you to do things easy.
+
 Stockroom is currently in it's first ever release. It doesn't have an exhaustive test
 suite and the APIs could change in backward incompatible way (for good).
 
+Why
+---
 Stockroom exists for three reasons
 
 - Work hand-in-hand with git:
