@@ -3,7 +3,8 @@ import shutil
 import pytest
 import hangar
 import numpy as np
-from stockroom import init_repo
+import lmdb
+from stockroom import init_repo, StockRoom
 
 
 @pytest.fixture()
@@ -21,8 +22,12 @@ def repo(monkeypatch, managed_tmpdir):
     cwd.joinpath(".gitignore").touch()
     init_repo('s', 'a@b.c', overwrite=True)
     yield None
-    repo = hangar.Repository(Path.cwd())
-    repo._env._close_environments()
+    stock = StockRoom()
+    # TODO: It's better to have the `close_environment` as public attribute in hangar
+    try:
+        stock._repo.hangar_repository._env._close_environments()
+    except lmdb.Error:
+        pass  # environment already closed by downstream functions
 
 
 @pytest.fixture()
@@ -34,4 +39,7 @@ def repo_with_aset(repo):
     co.commit('init aset')
     co.close()
     yield None
+    # TODO: It's better to have the `close_environment` as public attribute in hangar
     repo._env._close_environments()
+    stock = StockRoom()
+    stock._repo.hangar_repository._env._close_environments()

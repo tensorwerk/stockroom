@@ -34,6 +34,8 @@ class TestInit:
     def test_stock_init_on_existing_hangar_repo(self, cwd):
         repo = hangar.Repository(cwd, exists=False)
         repo.init('a', 'a@b.c')
+        # TODO: It's better to have the `close_environment` as public attribute in hangar
+        repo._env._close_environments()
         assert not cwd.joinpath('head.stock').exists()
         init_repo()
         assert cwd.joinpath('head.stock').exists()

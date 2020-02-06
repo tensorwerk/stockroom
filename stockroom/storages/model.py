@@ -63,7 +63,8 @@ class Model:
             # ---------- Create arraysets if not exist -----------------
             shapeKey = parser.model_shapekey(name, str(longest))
             if shapeKey not in co.arraysets.keys():
-                co.arraysets.init_arrayset(shapeKey, 10, np.int64, variable_shape=True)
+                shape_typ = np.array(1).dtype  # C long = int32 in win64; int64 elsewhere
+                co.arraysets.init_arrayset(shapeKey, 10, shape_typ, variable_shape=True)
             for i, w in enumerate(weights):
                 modelKey = parser.modelkey(name, str(longest), dtypes[i])
                 if modelKey not in co.arraysets.keys():
@@ -78,7 +79,9 @@ class Model:
                 if w.shape:
                     shape_aset[i] = np.array(w.shape)
                 else:
-                    shape_aset[i] = np.array(()).astype('int64')
+                    # C long = int32 in win64; int64 elsewhere
+                    shape_typ = np.array(1).dtype
+                    shape_aset[i] = np.array(()).astype(shape_typ)
 
     def __getitem__(self, name):
         with self._repo.checkout() as co:

@@ -1,20 +1,6 @@
 matrix:
   include:
-    - name: "Build Docs"
-      os: linux
-      dist: xenial
-      language: python
-      python: '3.7'
-      cache: pip
-      env:
-        - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
-        - SEGFAULT_SIGNALS=all
-        - TOXENV=docs
-      addons:
-        apt_packages:
-          - pandoc
-
-    # Cover 3.7
+    # ====================== Cover 3.7 ======================
     - name: "Linux Python 3.7: Run tests"
       os: linux
       dist: xenial
@@ -62,7 +48,7 @@ matrix:
             - $HOME/.cache/pip
             - $HOME/.cache/pyenv
 
-    # Cover 3.6
+    # ===================== Cover 3.6 =======================
     - name: "Linux Python 3.6: Run tests"
       os: linux
       dist: xenial
@@ -109,6 +95,21 @@ matrix:
         - directories:
             - $HOME/.cache/pip
             - $HOME/.cache/pyenv
+
+      # ======================= Build Doc =====================
+    - name: "Build Docs"
+      os: linux
+      dist: xenial
+      language: python
+      python: '3.7'
+      cache: pip
+      env:
+        - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
+        - SEGFAULT_SIGNALS=all
+        - TOXENV=docs
+      addons:
+        apt_packages:
+          - pandoc
 
 before_install:
   - |

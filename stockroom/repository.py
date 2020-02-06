@@ -1,6 +1,7 @@
 from pathlib import Path
 from contextlib import contextmanager
 
+import lmdb
 from hangar import Repository
 from .utils import get_current_head
 
@@ -8,7 +9,7 @@ from .utils import get_current_head
 class RootTracker(type):
     """
     A metaclass that make sure singleton-like implementation restricted on repository
-    path. This class checks for the repository path and returns the instance of
+    path. This class checks for the repository path and returns an existing instance of
     :class:`StorckRepository` for that path if exists. A path based singleton is
     essential since we need the ability to open one write checkout for each repository
     and make sure no another attempt to open the write checkout for the same repository
@@ -18,6 +19,11 @@ class RootTracker(type):
 
     def __call__(cls, root, *args, **kwargs):
         if root not in cls._instances:
+            cls._instances[root] = super().__call__(root, *args, **kwargs)
+        try:
+            # TODO: there should be a better way to test whether the envs are closed
+            cls._instances[root].hangar_repository._env.refenv.stat()
+        except lmdb.Error:
             cls._instances[root] = super().__call__(root, *args, **kwargs)
         return cls._instances[root]
 
@@ -117,6 +123,8 @@ def init_repo(name=None, email=None, overwrite=False):
             raise ValueError("Both ``name`` and ``email`` cannot be None")
         commit_hash = ''
         repo.init(user_name=name, user_email=email, remove_old=overwrite)
+    # TODO: It's better to have the `close_environment` as public attribute in hangar
+    repo._env._close_environments()
 
     stock_file = Path.cwd()/'head.stock'
     if not stock_file.exists():
