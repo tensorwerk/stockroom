@@ -79,7 +79,7 @@ class StockRoom:
         return self._repo.hangar_repository.checkout(write=write)
 
     @contextmanager
-    def optimize(self):
+    def optimize(self, write=False):
         """
         This context manager, on `enter`, asks the :class:`StockRepository` object to
         open the global checkout. Global checkout is being stored as property of the
@@ -87,8 +87,11 @@ class StockRoom:
         checkout until it is closed. This global checkout will be closed on the `exit` of
         this context manager
         """
+        if self._repo.is_optimized:
+            raise RuntimeError("Attempt to open one optimized checkout while another is "
+                               "in action in the same process")
         try:
-            self._repo.open_global_checkout()
+            self._repo.open_global_checkout(write)
             yield None
         finally:
             self._repo.close_global_checkout()
@@ -100,7 +103,7 @@ class StockRoom:
         close after the commit. Which means, no other write operations should be running
         while stock commit is in progress
         """
-        with self._repo.checkout(write=True) as co:
+        with self._repo.write_checkout() as co:
             digest = co.commit(message)
         set_current_head(self._repo.stockroot, digest)
         return digest

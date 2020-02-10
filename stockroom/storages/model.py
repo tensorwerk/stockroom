@@ -52,7 +52,7 @@ class Model:
         longest = max([len(x.reshape(-1)) for x in weights])
         dtypes = [w.dtype.name for w in weights]
 
-        with self._repo.checkout(write=True) as co:
+        with self._repo.write_checkout() as co:
             co.metadata[parser.model_metakey(name, 'library')] = library
             co.metadata[parser.model_metakey(name, 'libraryVersion')] = library_version
             co.metadata[parser.model_metakey(name, 'longest')] = str(longest)
@@ -84,7 +84,7 @@ class Model:
                     shape_aset[i] = np.array(()).astype(shape_typ)
 
     def __getitem__(self, name):
-        with self._repo.checkout() as co:
+        with self._repo.read_checkout() as co:
             try:
                 library = co.metadata[parser.model_metakey(name, 'library')]
             except KeyError:

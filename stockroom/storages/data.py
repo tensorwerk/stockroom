@@ -28,9 +28,9 @@ class Data:
         self._repo = repo
 
     def __setitem__(self, key, value):
-        with self._repo.checkout(write=True) as co:
+        with self._repo.write_checkout() as co:
             co[key] = value
 
     def __getitem__(self, key):
-        with self._repo.checkout() as co:
+        with self._repo.read_checkout() as co:
             return co[key]

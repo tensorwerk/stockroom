@@ -23,7 +23,7 @@ class Tag:
         self._repo = repo
 
     def __setitem__(self, key, value):
-        with self._repo.checkout(write=True) as co:
+        with self._repo.write_checkout() as co:
             if isinstance(value, int):
                 value_type = 'int'
             elif isinstance(value, float):
@@ -36,7 +36,7 @@ class Tag:
             co.metadata[parser.tag_typekey(key)] = value_type
 
     def __getitem__(self, key):
-        with self._repo.checkout() as co:
+        with self._repo.read_checkout() as co:
             try:
                 value = co.metadata[parser.tagkey(key)]
                 value_type = co.metadata[parser.tag_typekey(key)]

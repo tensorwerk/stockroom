@@ -37,60 +37,76 @@ class StockRepository(metaclass=RootTracker):
         self._hangar_repo = Repository(root)
         self._optimized_Rcheckout = None
         self._optimized_Wcheckout = None
-        self._has_optimized = False
+        self._has_optimized = {'R': False, 'W': False}
 
     @property
     def hangar_repository(self):
         return self._hangar_repo
 
-    def open_global_checkout(self):
+    @property
+    def is_optimized(self):
+        return any(self._has_optimized.values())
+
+    def open_global_checkout(self, write):
         head_commit = get_current_head(self._root)
         self._optimized_Rcheckout = self._hangar_repo.checkout(commit=head_commit)
-        self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
-        self._optimized_Wcheckout.__enter__()
         self._optimized_Rcheckout.__enter__()
-        self._has_optimized = True
+        self._has_optimized['R'] = True
+        if write:
+            self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
+            self._optimized_Wcheckout.__enter__()
+            self._has_optimized['W'] = True
 
     def close_global_checkout(self):
-        self._has_optimized = False
-        self._optimized_Wcheckout.__exit__()
+        self._has_optimized['R'] = False
         self._optimized_Rcheckout.__exit__()
-        self._optimized_Wcheckout.close()
         self._optimized_Rcheckout.close()
-        self._optimized_Wcheckout = None
         self._optimized_Rcheckout = None
+        if self._has_optimized['W']:
+            self._has_optimized['W'] = False
+            self._optimized_Wcheckout.__exit__()
+            self._optimized_Wcheckout.close()
+            self._optimized_Wcheckout = None
 
     @contextmanager
-    def checkout(self, write=False):
+    def read_checkout(self):
         """
-        An api similar to hangar checkout but creates the checkout object using the
-        commit hash from stock file instead of user supplying one. This enables users
-        to rely on git checkout for hangar checkout as well. This checkout is being
+        An api similar to hangar checkout in read mode but creates the checkout object
+        using the commit hash from stock file instead of user supplying one. This enables
+        users to rely on git checkout for hangar checkout as well. This checkout is being
         designed as a context manager that makes sure the checkout is closed. On entry
-        and exit, the CM checks the existence of a global checkout. On entry, ff global
+        and exit, the CM checks the existence of a global checkout. On entry, if global
         checkout exists, it returns the that instead of creating a new checkout. On exit,
         it doesn't close in case of global checkout instead it lets the CM do the closure
         """
-        if write:
-            if self._has_optimized:
-                co = self._optimized_Wcheckout
-            else:
-                if self._hangar_repo.writer_lock_held:
-                    raise PermissionError("Another write operation is in progress. "
-                                          "Could not acquire the lock")
-                co = self._hangar_repo.checkout(write=True)
+        if self._has_optimized['R']:
+            co = self._optimized_Rcheckout
         else:
-            if self._has_optimized:
-                co = self._optimized_Rcheckout
-            else:
-                head_commit = get_current_head(self._root)
-                co = self._hangar_repo.checkout(commit=head_commit)
+            head_commit = get_current_head(self._root)
+            co = self._hangar_repo.checkout(commit=head_commit)
         try:
             yield co
         finally:
-            if not self._has_optimized:
+            if not self._has_optimized['R']:
                 co.close()
-    
+
+    @contextmanager
+    def write_checkout(self):
+        """
+        An API similar to hangar checkout in write mode but does the closure of checkout
+        on the exit of CM. It also monitors the existence of global checkout and open
+        or close a local checkout if the global checkout doesn't exist
+        """
+        if self._has_optimized['W']:
+            co = self._optimized_Wcheckout
+        else:
+            co = self._hangar_repo.checkout(write=True)
+        try:
+            yield co
+        finally:
+            if not self._has_optimized['W']:
+                co.close()
+
     @property
     def stockroot(self) -> Path:
         """
@@ -117,7 +133,7 @@ def init_repo(name=None, email=None, overwrite=False):
             raise ValueError("Both ``name`` and ``email`` cannot be None")
         commit_hash = ''
         repo.init(user_name=name, user_email=email, remove_old=overwrite)
-    # TODO: It's better to have the `close_environment` as public attribute in hangar
+    # closing the environment for avoiding issues in windows
     repo._env._close_environments()
 
     stock_file = Path.cwd()/'head.stock'
