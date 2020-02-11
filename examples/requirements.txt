@@ -2,5 +2,5 @@ jupyter
 notebook
 jupyterlab
 stockroom
-google_images_download
+python-mnist
 PILLOW
