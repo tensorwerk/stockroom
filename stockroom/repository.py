@@ -5,24 +5,7 @@ from hangar import Repository
 from .utils import get_current_head
 
 
-class RootTracker(type):
-    """
-    A metaclass that make sure singleton-like implementation restricted on repository
-    path. This class checks for the repository path and returns an existing instance of
-    :class:`StorckRepository` for that path if exists. A path based singleton is
-    essential since we need the ability to open one write checkout for each repository
-    and make sure no another attempt to open the write checkout for the same repository
-    triggers from stockroom.
-    """
-    _instances = {}
-
-    def __call__(cls, root, *args, **kwargs):
-        if root not in cls._instances:
-            cls._instances[root] = super().__call__(root, *args, **kwargs)
-        return cls._instances[root]
-
-
-class StockRepository(metaclass=RootTracker):
+class StockRepository:
     """
     A StockRoom wrapper class for hangar repo operations. Every hangar repo interactions
     that is being done through stockroom (other than stock init) should go through the
@@ -133,8 +116,6 @@ def init_repo(name=None, email=None, overwrite=False):
             raise ValueError("Both ``name`` and ``email`` cannot be None")
         commit_hash = ''
         repo.init(user_name=name, user_email=email, remove_old=overwrite)
-    # closing the environment for avoiding issues in windows
-    repo._env._close_environments()
 
     stock_file = Path.cwd()/'head.stock'
     if not stock_file.exists():
