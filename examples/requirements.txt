@@ -1,0 +1,6 @@
+jupyter
+notebook
+jupyterlab
+stockroom
+python-mnist
+PILLOW

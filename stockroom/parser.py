@@ -1,35 +1,41 @@
-# TODO: best practices like utf8
-# TODO: is this separater enough
 SEP = '--_'
-PREFIX = '_STOCK'
+PREFIX = '_STK'
 
 
-def metakey(model, name):
-    return f"{PREFIX}_metakey_{model}_{name}"
+# ===================================================================
+#         Metadata & Arrayset key parsers for model store
+# ===================================================================
+def model_metakey(model, name):
+    return f"{PREFIX}{SEP}{model}{SEP}{name}"
 
 
-def model_asetkey_from_details(*args):
-    # TODO: make more reliable hash rather than time.time()
-    asetkey = f"{PREFIX}{SEP}"
-    return asetkey + SEP.join(args)
+def modelkey(name, longest, dtype):
+    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}{dtype}"
 
 
-def shape_asetkey_from_model_asetkey(model_asetkey):
-    return model_asetkey + '_shape'
+def model_shapekey(name, longest):
+    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}shape"
 
 
-# TODO: move this somewhere more sensib
-def layers_to_string(layers):
-    return ','.join(layers)
+# ===================================================================
+#                      Metadata Value parsers
+# ===================================================================
+
+def stringify(lst):
+    return ','.join(lst) if lst else ''
 
 
-def string_to_layers(string):
-    return string.split(',')
+def destringify(string):
+    return string.split(',') if string else ''
 
 
-def dtypes_to_string(dtypes):
-    return ','.join(dtypes)
+# ===================================================================
+#                            Tag keys
+# ===================================================================
+
+def tagkey(name):
+    return f"{PREFIX}{SEP}tag{SEP}{name}"
 
 
-def string_to_dtypes(string):
-    return string.split(',')
+def tag_typekey(name):
+    return f"{PREFIX}{SEP}{name}{SEP}tag{SEP}type"

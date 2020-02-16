@@ -1,71 +1,50 @@
-from pathlib import Path
 import click
-from hangar import Repository
-from . import repository
-
-
-# TODO: move repetative code in hangar and here to a common function
-pass_repo = click.make_pass_decorator(Repository, ensure=True)
+from .repository import init_repo
+from .main import StockRoom
 
 
 @click.group(no_args_is_help=True, add_help_option=True, invoke_without_command=True)
-@click.pass_context
-def main(ctx):
-    cwd = Path.cwd()
-    ctx.obj = Repository(path=cwd, exists=False)
+def main():
+    """
+    With ``stock`` we introduces a minimal set of commands which are necessary to run a
+    git + stockroom workflow. You will also be able to setup github hooks for few
+    ``stock`` actions in the upcoming release.
+    """
+    pass
+
+
+@main.command()
+@click.option('--name', prompt='User Name', help='First and last name of user')
+@click.option('--email', prompt='User Email', help='Email address of the user')
+@click.option('--overwrite', is_flag=True, default=False,
+              help='overwrite a repository if it exists at the current path')
+def init(name, email, overwrite):
+    """
+    Init stockroom repository. A stockroom repository is a hangar repository plus
+    a `head.stock` that will be tracked by git.
+    """
+    try:
+        init_repo(name, email, overwrite)
+    except RuntimeError as e:
+        raise click.ClickException(e)  # type: ignore
 
 
 @main.command()
 @click.option('--message', '-m', multiple=True,
-              help=('The commit message. If provided multiple times '
-                    'each argument gets converted into a new line.'))
-@pass_repo
-def commit(repo: Repository, message):
-    """Commits outstanding changes.
-
-    Commit changes to the given files into the repository. You will need to
-    'push' to push up your changes to other repositories.
+              help=('The commit message. If multiple arguments are provided, '
+                    'each of them gets converted into a new line'))
+def commit(message):
     """
-    from hangar.records.summarize import status
-    if not message:
-        with repo.checkout(write=True) as co:
-            diff = co.diff.staged()
-            status_txt = status(co.branch_name, diff.diff)
-            status_txt.seek(0)
-            marker = '# Changes To Be committed: \n'
-            hint = ['\n', '\n', marker, '# \n']
-            for line in status_txt.readlines():
-                hint.append(f'# {line}')
-            # open default system editor
-            message = click.edit(''.join(hint))
-            if message is None:
-                click.echo('Aborted!')
-                return
-            msg = message.split(marker)[0].rstrip()
-            if not msg:
-                click.echo('Aborted! Empty commit message')
-                return
-        # TODO: should be done in the __exit__ of hangar checkout
-        co.close()
-    else:
-        msg = '\n'.join(message)
+    It does a stock commit. Stock commit consists of two actions
+
+    1. Make a hangar commit and add the changed data to the repository
+    2. Update the `head.stock` file which should be tracked with a git commit
+    """
+    stock = StockRoom()
+    msg = '\n'.join(message)
     click.echo('Commit message:\n' + msg)
     try:
-        digest = repository.commit(message)
+        digest = stock.commit(message)
     except (FileNotFoundError, RuntimeError) as e:
-        raise click.ClickException(e)
+        raise click.ClickException(e)  # type: ignore
     click.echo(f'Commit Successful. Digest: {digest}')
-
-
-@main.command()
-@click.option('--name', prompt='User Name', help='first and last name of user')
-@click.option('--email', prompt='User Email', help='email address of the user')
-@click.option('--overwrite', is_flag=True, default=False,
-              help='overwrite a repository if it exists at the current path')
-def init(name, email, overwrite):
-    try:
-        repository.init(name, email, overwrite)
-    except RuntimeError as e:
-        raise click.ClickException(e)
-
-
