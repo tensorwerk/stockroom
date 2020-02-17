@@ -116,6 +116,8 @@ def init_repo(name=None, email=None, overwrite=False):
             raise ValueError("Both ``name`` and ``email`` cannot be None")
         commit_hash = ''
         repo.init(user_name=name, user_email=email, remove_old=overwrite)
+    # closing the environment for avoiding issues in windows
+    repo._env._close_environments()
 
     stock_file = Path.cwd()/'head.stock'
     if not stock_file.exists():

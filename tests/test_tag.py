@@ -1,9 +1,7 @@
-from stockroom import StockRoom
 import pytest
 
 
-def test_basic(repo):
-    stock = StockRoom()
+def test_basic(stock):
     stock.tag['lr'] = 0.01
     stock.tag['epochs'] = 500
     stock.tag['optimizer'] = 'adam'
@@ -13,8 +11,6 @@ def test_basic(repo):
     assert stock.tag['epochs'] == 500
 
 
-def test_save_string(repo):
-    stock = StockRoom()
+def test_save_string(stock):
     with pytest.raises(TypeError):
         stock.tag['wrongdata'] = bytes('hi')
-

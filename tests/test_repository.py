@@ -1,5 +1,5 @@
 from pathlib import Path
-from stockroom import StockRoom, init_repo
+from stockroom import init_repo
 import pytest
 import hangar
 
@@ -44,8 +44,7 @@ class TestInit:
 
 
 class TestCommit:
-    def test_basic(self, repo):
-        stock = StockRoom()
+    def test_basic(self, stock):
         stock.tag['key1'] = 'value'
         stock.commit('generic data')
         assert stock.tag['key1'] == 'value'
@@ -53,8 +52,7 @@ class TestCommit:
         with pytest.raises(KeyError):
             stock.tag['key2']
 
-    def test_commit_hash(self, repo):
-        stock = StockRoom()
+    def test_commit_hash(self, stock):
         stock.tag['key1'] = 'value'
         stock.commit('generic data')
         with open(stock._repo.stockroot/'head.stock') as f:
@@ -64,5 +62,5 @@ class TestCommit:
         with open(stock._repo.stockroot/'head.stock') as f:
             digest2 = f.read()
         log = stock._repo._hangar_repo.log(return_contents=True)
+        log['order'].pop()  # removing the digest from conftest.py
         assert log['order'] == [digest2, digest1]
-

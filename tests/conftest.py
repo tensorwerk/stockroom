@@ -3,7 +3,7 @@ import shutil
 import pytest
 import hangar
 import numpy as np
-from stockroom import init_repo
+from stockroom import StockRoom, init_repo
 
 
 @pytest.fixture()
@@ -38,3 +38,11 @@ def repo_with_aset(repo):
     co.commit('init aset')
     co.close()
     yield None
+    repo._env._close_environments()
+
+
+@pytest.fixture()
+def stock(repo_with_aset):
+    stock_obj = StockRoom()
+    yield stock_obj
+    stock_obj._repo.hangar_repository._env._close_environments()
