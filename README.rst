@@ -6,14 +6,20 @@ Stockroom
 .. image:: https://img.shields.io/pypi/v/stockroom.svg
         :target: https://pypi.python.org/pypi/stockroom
 
-.. image:: https://img.shields.io/travis/hhsecond/stockroom.svg
-        :target: https://travis-ci.org/hhsecond/stockroom
+.. image:: https://travis-ci.com/tensorwerk/stockroom.svg?branch=master
+        :target: https://travis-ci.com/tensorwerk/stockroom
 
 .. image:: https://readthedocs.org/projects/stockroom/badge/?version=latest
         :target: https://stockroom.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://img.shields.io/codecov/c/github/tensorwerk/stockroom
+        :target: https://codecov.io/gh/tensorwerk/stockroom/
+        :alt: Codecov
 
+.. image:: https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom
+        :target: https://lgtm.com/projects/g/tensorwerk/stockroom/
+        :alt: LGTM Grade
 
 Stockroom is a platform to version models, data, parameters, metrics etc. alongside git
 versioned source code. It is licensed as a Free software under
