@@ -10,7 +10,6 @@ with open('HISTORY.rst') as history_file:
 
 requirements = ['Click>=7.0', 'hangar>=0.4.0']
 
-
 setup(
     author="Sherin Thomas",
     author_email='sherin@tensorwerk.com',

@@ -2,6 +2,7 @@ from pathlib import Path
 from stockroom import init_repo
 import pytest
 import hangar
+import hangar.checkout
 
 
 class TestInit:
@@ -21,6 +22,12 @@ class TestInit:
     def test_init(self, repo_path):
         cwd = repo_path
         cwd.joinpath(".git").mkdir()
+        with pytest.raises(ValueError):
+            init_repo(overwrite=True)
+        with pytest.raises(ValueError):
+            init_repo(name='some', overwrite=True)
+        with pytest.raises(ValueError):
+            init_repo(email='some', overwrite=True)
         init_repo('s', 'a@b.c', overwrite=True)
         with open(cwd.joinpath('.gitignore')) as f:
             assert '\n.hangar\n' in f.read()
@@ -34,7 +41,6 @@ class TestInit:
     def test_stock_init_on_existing_hangar_repo(self, cwd):
         repo = hangar.Repository(cwd, exists=False)
         repo.init('a', 'a@b.c')
-        # TODO: It's better to have the `close_environment` as public attribute in hangar
         repo._env._close_environments()
         assert not cwd.joinpath('head.stock').exists()
         init_repo()
@@ -64,3 +70,15 @@ class TestCommit:
         log = stock._repo._hangar_repo.log(return_contents=True)
         log['order'].pop()  # removing the digest from conftest.py
         assert log['order'] == [digest2, digest1]
+
+
+def test_hangar_checkout_from_stock_obj(stock):
+    co = stock.get_hangar_checkout()
+    assert isinstance(co, hangar.checkout.ReaderCheckout)
+    co = stock.get_hangar_checkout(write=True)
+    assert hasattr(co, '_writer_lock')
+
+    with pytest.raises(PermissionError):
+        # TODO: document this scenario
+        stock.tag['key1'] = 'value'
+    co.close()
