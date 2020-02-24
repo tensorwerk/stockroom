@@ -32,13 +32,19 @@ class StockRepository:
 
     def open_global_checkout(self, write):
         head_commit = get_current_head(self._root)
+
+        if write:
+            self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
+            if self._optimized_Wcheckout.commit_hash != head_commit:
+                self._optimized_Wcheckout.close()
+                raise RuntimeError("Writing on top of the old commit's are not allowed. "
+                                   "Checkout to the latest commit")
+            self._optimized_Wcheckout.__enter__()
+            self._has_optimized['W'] = True
+
         self._optimized_Rcheckout = self._hangar_repo.checkout(commit=head_commit)
         self._optimized_Rcheckout.__enter__()
         self._has_optimized['R'] = True
-        if write:
-            self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
-            self._optimized_Wcheckout.__enter__()
-            self._has_optimized['W'] = True
 
     def close_global_checkout(self):
         self._has_optimized['R'] = False
@@ -83,7 +89,12 @@ class StockRepository:
         if self._has_optimized['W']:
             co = self._optimized_Wcheckout
         else:
+            head_commit = get_current_head(self._root)
             co = self._hangar_repo.checkout(write=True)
+            if co.commit_hash != head_commit:
+                co.close()
+                raise RuntimeError("Writing on top of the old commit's are not allowed. "
+                                   "Checkout to the latest commit")
         try:
             yield co
         finally:

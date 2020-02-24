@@ -31,7 +31,7 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities',
     ],
-    description="",
+    description="Platform to version model, data, parameters alongside git versioned source code",
     project_urls={
         'Documentation': 'https://stockroom.readthedocs.io',
         'Issue Tracker': 'https://github.com/tensorwerk/stockroom/issues'},
