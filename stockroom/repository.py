@@ -5,24 +5,7 @@ from hangar import Repository
 from .utils import get_current_head
 
 
-class RootTracker(type):
-    """
-    A metaclass that make sure singleton-like implementation restricted on repository
-    path. This class checks for the repository path and returns an existing instance of
-    :class:`StorckRepository` for that path if exists. A path based singleton is
-    essential since we need the ability to open one write checkout for each repository
-    and make sure no another attempt to open the write checkout for the same repository
-    triggers from stockroom.
-    """
-    _instances = {}
-
-    def __call__(cls, root, *args, **kwargs):
-        if root not in cls._instances:
-            cls._instances[root] = super().__call__(root, *args, **kwargs)
-        return cls._instances[root]
-
-
-class StockRepository(metaclass=RootTracker):
+class StockRepository:
     """
     A StockRoom wrapper class for hangar repo operations. Every hangar repo interactions
     that is being done through stockroom (other than stock init) should go through the
@@ -49,13 +32,19 @@ class StockRepository(metaclass=RootTracker):
 
     def open_global_checkout(self, write):
         head_commit = get_current_head(self._root)
+
+        if write:
+            self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
+            if self._optimized_Wcheckout.commit_hash != head_commit:
+                self._optimized_Wcheckout.close()
+                raise RuntimeError("Writing on top of the old commit's are not allowed. "
+                                   "Checkout to the latest commit")
+            self._optimized_Wcheckout.__enter__()
+            self._has_optimized['W'] = True
+
         self._optimized_Rcheckout = self._hangar_repo.checkout(commit=head_commit)
         self._optimized_Rcheckout.__enter__()
         self._has_optimized['R'] = True
-        if write:
-            self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
-            self._optimized_Wcheckout.__enter__()
-            self._has_optimized['W'] = True
 
     def close_global_checkout(self):
         self._has_optimized['R'] = False
@@ -100,7 +89,12 @@ class StockRepository(metaclass=RootTracker):
         if self._has_optimized['W']:
             co = self._optimized_Wcheckout
         else:
+            head_commit = get_current_head(self._root)
             co = self._hangar_repo.checkout(write=True)
+            if co.commit_hash != head_commit:
+                co.close()
+                raise RuntimeError("Writing on top of the old commit's are not allowed. "
+                                   "Checkout to the latest commit")
         try:
             yield co
         finally:

@@ -3,9 +3,7 @@ import shutil
 import pytest
 import hangar
 import numpy as np
-import lmdb
-import stockroom.repository
-from stockroom import init_repo, StockRoom
+from stockroom import StockRoom, init_repo
 
 
 @pytest.fixture()
@@ -17,7 +15,6 @@ def managed_tmpdir(monkeypatch, tmp_path):
     monkeypatch.setattr(hangar.backends.hdf5_01, 'COLLECTION_COUNT', 10)
     monkeypatch.setattr(hangar.backends.hdf5_01, 'COLLECTION_SIZE', 50)
     monkeypatch.setattr(hangar.backends.numpy_10, 'COLLECTION_SIZE', 50)
-    stockroom.repository.RootTracker._instances = {}
     yield tmp_path
     shutil.rmtree(tmp_path)
 
@@ -30,11 +27,6 @@ def repo(monkeypatch, managed_tmpdir):
     cwd.joinpath(".gitignore").touch()
     init_repo('s', 'a@b.c', overwrite=True)
     yield None
-    stock = StockRoom()
-    try:
-        stock._repo.hangar_repository._env._close_environments()
-    except lmdb.Error:
-        pass  # environment already closed by downstream functions
 
 
 @pytest.fixture()
@@ -47,5 +39,10 @@ def repo_with_aset(repo):
     co.close()
     yield None
     repo._env._close_environments()
-    stock = StockRoom()
-    stock._repo.hangar_repository._env._close_environments()
+
+
+@pytest.fixture()
+def stock(repo_with_aset):
+    stock_obj = StockRoom()
+    yield stock_obj
+    stock_obj._repo.hangar_repository._env._close_environments()

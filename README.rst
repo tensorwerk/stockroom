@@ -6,14 +6,20 @@ Stockroom
 .. image:: https://img.shields.io/pypi/v/stockroom.svg
         :target: https://pypi.python.org/pypi/stockroom
 
-.. image:: https://img.shields.io/travis/hhsecond/stockroom.svg
-        :target: https://travis-ci.org/hhsecond/stockroom
+.. image:: https://travis-ci.com/tensorwerk/stockroom.svg?branch=master
+        :target: https://travis-ci.com/tensorwerk/stockroom
 
 .. image:: https://readthedocs.org/projects/stockroom/badge/?version=latest
         :target: https://stockroom.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://img.shields.io/codecov/c/github/tensorwerk/stockroom
+        :target: https://codecov.io/gh/tensorwerk/stockroom/
+        :alt: Codecov
 
+.. image:: https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom
+        :target: https://lgtm.com/projects/g/tensorwerk/stockroom/
+        :alt: LGTM Grade
 
 Stockroom is a platform to version models, data, parameters, metrics etc. alongside git
 versioned source code. It is licensed as a Free software under
@@ -21,35 +27,30 @@ versioned source code. It is licensed as a Free software under
 
 Introduction
 ------------
-Stockroom is built on top of `hangar <https://github.com/tensorwerk/hangar-py>`_ and hence
-is high performant but with a minimal and simple set of APIs. We tried to reduce the
-cognitive overload as much as possible for a new user to get started. So stockroom is not
-exactly a wrapper that blinds you from the internal hangar philosophy but it's a tool
-that enables you to do things easy.
+Stockroom is built on top of hangar_ & hence is high performing. It abstracts away few
+hangar APIs by making assumptions and operating implicitly. One good example for such
+implicit decision-making is the "checkout management". Stockroom, as a package, is not
+self-contained and whenever possible, off load the heavy lifting to hangar's well written
+APIs. However, the tutorials and documentations are self-contained to make sure users
+doesn't have to run through different places to start working on stockroom.
 
-Stockroom is currently in it's first ever release. It doesn't have an exhaustive test
-suite and the APIs could change in backward incompatible way (for good).
 
 Why
 ---
-Stockroom exists for three reasons
-
-- Work hand-in-hand with git:
-
-Stockroom let git does ``checkout`` and rely on that to move between branches/commits.
-This allows stockroom to present a very simple and intuitive API collection to the user
+One important motivation behind the initial design of stockroom is to avoid users
+learning another tool for versioning. We try to make the APIs as minimal and familiar as
+possible while relying on other popular tools such as git & hangar. Stockroom let "git"
+does ``checkout`` and rely on "git" to move between branches/commits. This allows
+stockroom to present a very simple and intuitive API collection to the user
 while avoiding the need of user learning another set of commands otherwise they'd need.
+In a nutshell, Stockroom exists for three reasons
 
-- Simplify `hangar <https://github.com/tensorwerk/hangar-py>`_ APIs:
+- Work hand-in-hand with git
+- Make it possible to version model, data, hyper-parameters metrics etc.
+- Making versioning easy for `software 2.0`_ stack
 
-Hangar is an extensive and reliable tool that allows users to have fine grained control
-for storing and versioning data without compromising the speed and efficiency.
-Essentially trying to do what git did for source code but for data. But the set of APIs
-hangar provides are also extensive and can be cut short if we can delegate few tasks to
-git and make certain assumptions. And that's exactly what stockroom does
-
-- Make storage of model + data + params + metrics and versioning them possible in `hangar <https://github.com/tensorwerk/hangar-py>`_
-
+.. _hangar: https://github.com/tensorwerk/hangar-py
+.. _software 2.0: https://medium.com/@karpathy/software-2-0-a64152b37c35
 
 
 Example
@@ -60,5 +61,14 @@ Example
     import numpy as np
 
     stock = StockRoom()
-    stock.data['sample1'] = np.random.random((3, 28, 28))
+    weights = stock.model['resnet50']
+    model = make_model(weights)
+    for e in range(epochs):
+        for i in range(limit):
+            x, y = stock.data['dataset', i]
+            out = model(x)
+            update_weights(out, y)
+            if loss < previous_loss:
+                stock.model['resnet50'] = get_weights(model)
+                stock.commit('adding a better model)
 

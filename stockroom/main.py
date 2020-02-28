@@ -50,7 +50,6 @@ class StockRoom:
         self.data = Data(self._repo)
         self.tag = Tag(self._repo)
 
-    @property
     def get_hangar_checkout(self, write: bool = False) -> Any:
         """
         Fetch the hangar checkout object that's been used by stockroom internally. Don't

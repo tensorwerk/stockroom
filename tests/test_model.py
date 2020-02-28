@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-from stockroom import StockRoom
 from copy import deepcopy
 
 
@@ -17,9 +16,7 @@ class TestTFModelStore:
         return tf_model
 
     @pytest.mark.filterwarnings('ignore:the imp module is deprecated:DeprecationWarning')
-    def test_saving_tf(self, repo):
-        stock = StockRoom()
-
+    def test_saving_tf(self, stock):
         tf_model = self.get_new_model()
         old_weights = tf_model.get_weights()
         stock.model.save_weights('tf_model', tf_model)
@@ -48,9 +45,7 @@ class TestTorchModelStore:
             torch.nn.Linear(3, 1))
         return torch_model
 
-    def test_saving_torch(self, repo):
-        stock = StockRoom()
-
+    def test_saving_torch(self, stock):
         torch_model = self.get_new_model()
         old_state = torch_model.state_dict()
         stock.model.save_weights('torch_model', torch_model)
@@ -64,9 +59,8 @@ class TestTorchModelStore:
             assert np.allclose(old_state[k], new_state[k])
             assert not np.allclose(tmp_state[k], new_state[k])
 
-    def test_load_with_different_library_version(self, repo, monkeypatch):
+    def test_load_with_different_library_version(self, stock, monkeypatch):
         import torch
-        stock = StockRoom()
         torch_model = self.get_new_model()
         stock.model.save_weights('thm', torch_model)
         stock.commit("adding th model")
@@ -77,17 +71,14 @@ class TestTorchModelStore:
             assert len(warning_rec) == 1
             assert "PyTorch version used" in warning_rec[0].message.args[0]
 
-    def test_unknown_model_type(self, repo):
-        stock = StockRoom()
+    def test_unknown_model_type(self, stock):
         with pytest.raises(TypeError):
             stock.model.save_weights('invalid', {})
 
-    def test_load_nonexisting_key(self, repo):
-        stock = StockRoom()
+    def test_load_nonexisting_key(self, stock):
         thm = self.get_new_model()
         stock.model.save_weights('thm', thm)
         stock.commit("adding th model")
         with pytest.raises(KeyError) as error:
             stock.model.load_weights('wrongname', thm)
         assert 'Model with key wrongname not found' == error.value.args[0]
-        stock._repo._hangar_repo._env._close_environments()

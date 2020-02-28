@@ -1,7 +1,8 @@
 from pathlib import Path
-from stockroom import StockRoom, init_repo
+from stockroom import init_repo
 import pytest
 import hangar
+import hangar.checkout
 
 
 class TestInit:
@@ -21,6 +22,12 @@ class TestInit:
     def test_init(self, repo_path):
         cwd = repo_path
         cwd.joinpath(".git").mkdir()
+        with pytest.raises(ValueError):
+            init_repo(overwrite=True)
+        with pytest.raises(ValueError):
+            init_repo(name='some', overwrite=True)
+        with pytest.raises(ValueError):
+            init_repo(email='some', overwrite=True)
         init_repo('s', 'a@b.c', overwrite=True)
         with open(cwd.joinpath('.gitignore')) as f:
             assert '\n.hangar\n' in f.read()
@@ -34,7 +41,6 @@ class TestInit:
     def test_stock_init_on_existing_hangar_repo(self, cwd):
         repo = hangar.Repository(cwd, exists=False)
         repo.init('a', 'a@b.c')
-        # TODO: It's better to have the `close_environment` as public attribute in hangar
         repo._env._close_environments()
         assert not cwd.joinpath('head.stock').exists()
         init_repo()
@@ -44,8 +50,7 @@ class TestInit:
 
 
 class TestCommit:
-    def test_basic(self, repo):
-        stock = StockRoom()
+    def test_basic(self, stock):
         stock.tag['key1'] = 'value'
         stock.commit('generic data')
         assert stock.tag['key1'] == 'value'
@@ -53,8 +58,7 @@ class TestCommit:
         with pytest.raises(KeyError):
             stock.tag['key2']
 
-    def test_commit_hash(self, repo):
-        stock = StockRoom()
+    def test_commit_hash(self, stock):
         stock.tag['key1'] = 'value'
         stock.commit('generic data')
         with open(stock._repo.stockroot/'head.stock') as f:
@@ -64,5 +68,17 @@ class TestCommit:
         with open(stock._repo.stockroot/'head.stock') as f:
             digest2 = f.read()
         log = stock._repo._hangar_repo.log(return_contents=True)
+        log['order'].pop()  # removing the digest from conftest.py
         assert log['order'] == [digest2, digest1]
 
+
+def test_hangar_checkout_from_stock_obj(stock):
+    co = stock.get_hangar_checkout()
+    assert isinstance(co, hangar.checkout.ReaderCheckout)
+    co = stock.get_hangar_checkout(write=True)
+    assert hasattr(co, '_writer_lock')
+
+    with pytest.raises(PermissionError):
+        # TODO: document this scenario
+        stock.tag['key1'] = 'value'
+    co.close()

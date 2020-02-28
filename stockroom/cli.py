@@ -1,9 +1,11 @@
 import click
 from .repository import init_repo
 from .main import StockRoom
+from . import __version__
 
 
 @click.group(no_args_is_help=True, add_help_option=True, invoke_without_command=True)
+@click.version_option(version=__version__, help='display current stockroom version')
 def main():
     """
     With ``stock`` we introduces a minimal set of commands which are necessary to run a
@@ -35,11 +37,14 @@ def init(name, email, overwrite):
                     'each of them gets converted into a new line'))
 def commit(message):
     """
-    It does a stock commit. Stock commit consists of two actions
+    It does a stock commit. Stock commit consists of three actions
 
     1. Make a hangar commit and add the changed data to the repository
     2. Update the `head.stock` file which should be tracked with a git commit
+    3. [Optional] Make a git commit and add the head.stock file to git history
     """
+    if len(message) < 1:
+        raise click.ClickException(ValueError("Require commit message"))
     stock = StockRoom()
     msg = '\n'.join(message)
     click.echo('Commit message:\n' + msg)
