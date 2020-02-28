@@ -4,6 +4,7 @@ import numpy as np
 
 from .. import parser
 from ..utils import LazyLoader
+from ..repository import StockRepository
 
 torch = LazyLoader('torch', globals(), 'torch')
 tf = LazyLoader('tf', globals(), 'tensorflow')
@@ -34,8 +35,8 @@ class Model:
     weights from the model or how to put weights back to model. Checkout :meth:`Model.save_weights`
     & :meth:`Model.load_weights` for more details
     """
-    def __init__(self, repo):
-        self._repo = repo
+    def __init__(self, repo: StockRepository):
+        self._stock_repo = repo
 
     def __setitem__(self, name, weights):
         if isinstance(weights, dict):
@@ -52,10 +53,10 @@ class Model:
         longest = max([len(x.reshape(-1)) for x in weights])
         dtypes = [w.dtype.name for w in weights]
 
-        with self._repo.write_checkout() as co:
+        with self._stock_repo.get_writer_cm() as writer:
             metakey = parser.model_metakey(name)
-            if metakey not in co.columns.keys():
-                metacol = co.add_str_column(metakey)
+            if metakey not in writer.columns.keys():
+                metacol = writer.add_str_column(metakey)
             metacol['library'] = library
             metacol['libraryVersion'] = library_version
             metacol['longest'] = str(longest)
@@ -65,20 +66,21 @@ class Model:
 
             # ---------- Create ndarray columns if doesn't exist -----------------
             shapeKey = parser.model_shapekey(name, str(longest))
-            if shapeKey not in co.columns.keys():
+            if shapeKey not in writer.columns.keys():
                 shape_typ = np.array(1).dtype  # C long = int32 in win64; int64 elsewhere
-                co.add_ndarray_column(shapeKey, 10, shape_typ, variable_shape=True)
+                writer.add_ndarray_column(shapeKey, 10, shape_typ, variable_shape=True)
             for i, w in enumerate(weights):
                 modelKey = parser.modelkey(name, str(longest), dtypes[i])
-                if modelKey not in co.columns.keys():
-                    co.add_ndarray_column(
+                if modelKey not in writer.columns.keys():
+                    writer.add_ndarray_column(
                         modelKey, longest, np.dtype(dtypes[i]), variable_shape=True)
             # ---------------------------------------------------------
 
-            shape_col = co.columns[shapeKey]
+            shape_col = writer.columns[shapeKey]
             for i, w in enumerate(weights):
-                model_col = co.columns[parser.modelkey(name, longest, dtypes[i])]
+                model_col = writer.columns[parser.modelkey(name, longest, dtypes[i])]
                 model_col[i] = w.reshape(-1)
+
                 if w.shape:
                     shape_col[i] = np.array(w.shape)
                 else:
@@ -87,40 +89,40 @@ class Model:
                     shape_col[i] = np.array(()).astype(shape_typ)
 
     def __getitem__(self, name):
-        with self._repo.read_checkout() as co:
-            try:
-                metakey = parser.model_metakey(name)
-                metacol = co.columns[metakey]
-            except KeyError:
-                raise KeyError(f"Model with key {name} not found")
-            library = metacol['library']
-            library_version = metacol['libraryVersion']
-            longest = int(metacol['longest'])
-            dtypes = parser.destringify(metacol['dtypes'])
-            num_layers = int(metacol['numLayers'])
-            layers = parser.destringify(metacol['layers'])
+        reader = self._stock_repo.reader
+        try:
+            metakey = parser.model_metakey(name)
+            metacol = reader.columns[metakey]
+        except KeyError:
+            raise KeyError(f"Model with key {name} not found")
+        library = metacol['library']
+        library_version = metacol['libraryVersion']
+        longest = int(metacol['longest'])
+        dtypes = parser.destringify(metacol['dtypes'])
+        num_layers = int(metacol['numLayers'])
+        layers = parser.destringify(metacol['layers'])
 
-            shapeKey = parser.model_shapekey(name, longest)
-            shape_col = co.columns[shapeKey]
-            weights = []
-            for i in range(num_layers):
-                modelKey = parser.modelkey(name, longest, dtypes[i])
-                col = co.columns[modelKey]
-                w = col[i].reshape(np.array(shape_col[i]))
-                weights.append(w)
-            if library == 'torch':
-                if torch.__version__ != library_version:
-                    warnings.warn(f"PyTorch version used while storing the model "
-                                  f"({library_version}) is not same as the one installed "
-                                  f"in the current environment. i.e {torch.__version__}")
-                return {layers[i]: torch.from_numpy(weights[i]) for i in range(num_layers)}
+        shapeKey = parser.model_shapekey(name, longest)
+        shape_col = reader.columns[shapeKey]
+        weights = []
+        for i in range(num_layers):
+            modelKey = parser.modelkey(name, longest, dtypes[i])
+            col = reader.columns[modelKey]
+            w = col[i].reshape(np.array(shape_col[i]))
+            weights.append(w)
+        if library == 'torch':
+            if torch.__version__ != library_version:
+                warnings.warn(f"PyTorch version used while storing the model "
+                              f"({library_version}) is not same as the one installed "
+                              f"in the current environment. i.e {torch.__version__}")
+            return {layers[i]: torch.from_numpy(weights[i]) for i in range(num_layers)}
 
-            else:
-                if tf.__version__ != library_version:
-                    warnings.warn(f"Tensorflow version used while storing the model "
-                                  f"({library_version}) is not same as the one installed "
-                                  f"in the current environment. i.e {tf.__version__}")
-                return weights
+        else:
+            if tf.__version__ != library_version:
+                warnings.warn(f"Tensorflow version used while storing the model "
+                              f"({library_version}) is not same as the one installed "
+                              f"in the current environment. i.e {tf.__version__}")
+            return weights
 
     def save_weights(self, name, model):
         """

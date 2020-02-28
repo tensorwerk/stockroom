@@ -44,11 +44,11 @@ class StockRoom:
     """
     def __init__(self, path: Union[str, Path, None] = None):
         self.path = Path(path) if path else get_stock_root(Path.cwd())
-        self._repo = StockRepository(self.path)
+        self._stock_repo = StockRepository(self.path)
 
-        self.model = Model(self._repo)
-        self.data = Data(self._repo)
-        self.tag = Tag(self._repo)
+        self.model = Model(self._stock_repo)
+        self.data = Data(self._stock_repo)
+        self.tag = Tag(self._stock_repo)
 
     def get_hangar_checkout(self, write: bool = False) -> Any:
         """
@@ -75,10 +75,11 @@ class StockRoom:
         you neither be able to do any write operation through stockroom nor be able to
         open ``optimize`` context manager
         """
-        return self._repo.hangar_repository.checkout(write=write)
+        return self._stock_repo.hangar_repo.checkout(write=write)
 
     @contextmanager
-    def optimize(self, write=False):
+    def optimize(self):
+        # TODO: change docstring
         """
         This context manager, on `enter`, asks the :class:`StockRepository` object to
         open the global checkout. Global checkout is being stored as property of the
@@ -86,24 +87,32 @@ class StockRoom:
         checkout until it is closed. This global checkout will be closed on the `exit` of
         this context manager
         """
-        if self._repo.is_optimized:
+        if self._stock_repo.is_write_optimized:
             raise RuntimeError("Attempt to open one optimized checkout while another is "
                                "in action in the same process")
         try:
-            self._repo.open_global_checkout(write)
-            yield None
+            self._stock_repo.open_global_writer()
+            yield
         finally:
-            if self._repo.is_optimized:
-                self._repo.close_global_checkout()
+            # this guard is necessary if exception while opening checkout
+            if self._stock_repo.is_write_optimized:
+                self._stock_repo.close_global_writer()
 
-    def commit(self, message: str) -> str:
+    def commit(self, message: str, update_head=True) -> str:
         """
         Make a stock commit. A stock commit is a hangar commit plus writing the commit
         hash to the stock file. This function opens the stock checkout in write mode and
         close after the commit. Which means, no other write operations should be running
         while stock commit is in progress
         """
-        with self._repo.write_checkout() as co:
-            digest = co.commit(message)
-        set_current_head(self._repo.stockroot, digest)
+        # TODO: should we update the head here? If update, change the test cases too
+        with self._stock_repo.get_writer_cm() as writer:
+            digest = writer.commit(message)
+        set_current_head(self._stock_repo.stockroot, digest)
+        if update_head:
+            self.update_head()
         return digest
+
+    def update_head(self):
+        self._stock_repo.update_head()
+

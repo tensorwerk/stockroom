@@ -36,5 +36,6 @@ def test_commit(repo_with_col):
     assert 'Error: Require commit message\n' in res.stdout
     res = runner.invoke(cli.commit, ['-m', 'test commit'])
     assert res.exit_code == 0
-    assert 'Commit message:\ntest commit\nCommit Successful. Digest' in res.stdout
-    stock._repo.hangar_repository._env._close_environments()
+    assert 'Commit message:\ntest commit' in res.stdout
+    assert 'Commit Successful. Digest' in res.stdout
+    stock._stock_repo.hangar_repo._env._close_environments()

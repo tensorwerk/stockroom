@@ -61,13 +61,13 @@ class TestCommit:
     def test_commit_hash(self, stock):
         stock.tag['key1'] = 'value'
         stock.commit('generic data')
-        with open(stock._repo.stockroot/'head.stock') as f:
+        with open(stock._stock_repo.stockroot/'head.stock') as f:
             digest1 = f.read()
         stock.tag['key2'] = 'value2'
         stock.commit('generic data 2')
-        with open(stock._repo.stockroot/'head.stock') as f:
+        with open(stock._stock_repo.stockroot/'head.stock') as f:
             digest2 = f.read()
-        log = stock._repo._hangar_repo.log(return_contents=True)
+        log = stock._stock_repo.hangar_repo.log(return_contents=True)
         log['order'].pop()  # removing the digest from conftest.py
         assert log['order'] == [digest2, digest1]
 

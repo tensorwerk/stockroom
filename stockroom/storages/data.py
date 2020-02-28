@@ -1,3 +1,5 @@
+from ..repository import StockRepository
+
 
 class Data:
     """
@@ -24,13 +26,12 @@ class Data:
     >>> with stock.optimize():
     ...     sample = stock.data['coloumn1', 'sample1']
     """
-    def __init__(self, repo):
-        self._repo = repo
+    def __init__(self, repo: StockRepository):
+        self._stock_repo = repo
 
     def __setitem__(self, key, value):
-        with self._repo.write_checkout() as co:
-            co[key] = value
+        with self._stock_repo.get_writer_cm() as writer:
+            writer[key] = value
 
     def __getitem__(self, key):
-        with self._repo.read_checkout() as co:
-            return co[key]
+        return self._stock_repo.reader[key]

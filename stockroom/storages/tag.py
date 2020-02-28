@@ -1,4 +1,5 @@
 from .. import parser
+from ..repository import StockRepository
 
 
 class Tag:
@@ -18,12 +19,12 @@ class Tag:
     >>> stock.tag['lr'] = 0.0001
     >>> stock.tag['optimizer'] = 'adam'
     """
-    def __init__(self, repo):
+    def __init__(self, repo: StockRepository):
         self.typecaster = {'int': int, 'float': float, 'str': str}
-        self._repo = repo
+        self._stock_repo = repo
 
     def __setitem__(self, key, value):
-        with self._repo.write_checkout() as co:
+        with self._stock_repo.get_writer_cm() as writer:
             if isinstance(value, int):
                 value_type = 'int'
             elif isinstance(value, float):
@@ -32,18 +33,18 @@ class Tag:
                 value_type = 'str'
             else:
                 raise TypeError("Tag store can accept only ``int``, ``float`` or ``str``")
-            co.metadata[parser.tagkey(key)] = str(value)
-            co.metadata[parser.tag_typekey(key)] = value_type
+            writer.metadata[parser.tagkey(key)] = str(value)
+            writer.metadata[parser.tag_typekey(key)] = value_type
 
     def __getitem__(self, key):
-        with self._repo.read_checkout() as co:
-            try:
-                value = co.metadata[parser.tagkey(key)]
-                value_type = co.metadata[parser.tag_typekey(key)]
-            except KeyError:
-                raise KeyError(f"Data not found with key {key}")
-            try:
-                return self.typecaster[value_type](value)
-            except KeyError:
-                raise KeyError(f"Data tampering suspected. Could not "
-                               f"read the data type {value_type}")
+        reader = self._stock_repo.reader
+        try:
+            value = reader.metadata[parser.tagkey(key)]
+            value_type = reader.metadata[parser.tag_typekey(key)]
+        except KeyError:
+            raise KeyError(f"Data not found with key {key}")
+        try:
+            return self.typecaster[value_type](value)
+        except KeyError:
+            raise KeyError(f"Data tampering suspected. Could not "
+                           f"read the data type {value_type}")

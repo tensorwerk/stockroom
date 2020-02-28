@@ -45,4 +45,4 @@ def repo_with_col(repo):
 def stock(repo_with_col):
     stock_obj = StockRoom()
     yield stock_obj
-    stock_obj._repo.hangar_repository._env._close_environments()
+    stock_obj._stock_repo.hangar_repo._env._close_environments()

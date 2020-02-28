@@ -6,6 +6,7 @@ def test_basic(stock):
     stock.tag['epochs'] = 500
     stock.tag['optimizer'] = 'adam'
     stock.commit('Saved lr')
+
     assert stock.tag['lr'] == 0.01
     assert stock.tag['optimizer'] == 'adam'
     assert stock.tag['epochs'] == 500
