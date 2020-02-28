@@ -34,7 +34,7 @@ def repo_with_aset(repo):
     repo = hangar.Repository(Path.cwd())
     co = repo.checkout(write=True)
     arr = np.arange(20).reshape(4, 5)
-    co.arraysets.init_arrayset('aset', prototype=arr)
+    co.columns.init_arrayset('aset', prototype=arr)
     co.commit('init aset')
     co.close()
     yield None

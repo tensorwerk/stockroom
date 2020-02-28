@@ -3,7 +3,7 @@ PREFIX = '_STK'
 
 
 # ===================================================================
-#         Metadata & Arrayset key parsers for model store
+#         Metadata & Column key parsers for model store
 # ===================================================================
 def model_metakey(model, name):
     return f"{PREFIX}{SEP}{model}{SEP}{name}"
