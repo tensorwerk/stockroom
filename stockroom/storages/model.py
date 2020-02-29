@@ -53,14 +53,17 @@ class Model:
         dtypes = [w.dtype.name for w in weights]
 
         with self._repo.write_checkout() as co:
-            co.metadata[parser.model_metakey(name, 'library')] = library
-            co.metadata[parser.model_metakey(name, 'libraryVersion')] = library_version
-            co.metadata[parser.model_metakey(name, 'longest')] = str(longest)
-            co.metadata[parser.model_metakey(name, 'dtypes')] = parser.stringify(dtypes)
-            co.metadata[parser.model_metakey(name, 'numLayers')] = str(len(weights))
-            co.metadata[parser.model_metakey(name, 'layers')] = parser.stringify(layers)
+            metakey = parser.model_metakey(name)
+            if metakey not in co.columns.keys():
+                metacol = co.add_str_column(metakey)
+            metacol['library'] = library
+            metacol['libraryVersion'] = library_version
+            metacol['longest'] = str(longest)
+            metacol['dtypes'] = parser.stringify(dtypes)
+            metacol['numLayers'] = str(len(weights))
+            metacol['layers'] = parser.stringify(layers)
 
-            # ---------- Create columns if not exist -----------------
+            # ---------- Create ndarray columns if doesn't exist -----------------
             shapeKey = parser.model_shapekey(name, str(longest))
             if shapeKey not in co.columns.keys():
                 shape_typ = np.array(1).dtype  # C long = int32 in win64; int64 elsewhere
@@ -86,21 +89,23 @@ class Model:
     def __getitem__(self, name):
         with self._repo.read_checkout() as co:
             try:
-                library = co.metadata[parser.model_metakey(name, 'library')]
+                metakey = parser.model_metakey(name)
+                metacol = co.columns[metakey]
             except KeyError:
                 raise KeyError(f"Model with key {name} not found")
-            library_version = co.metadata[parser.model_metakey(name, 'libraryVersion')]
-            longest = int(co.metadata[parser.model_metakey(name, 'longest')])
-            dtypes = parser.destringify(co.metadata[parser.model_metakey(name, 'dtypes')])
-            num_layers = int(co.metadata[parser.model_metakey(name, 'numLayers')])
-            layers = parser.destringify(co.metadata[parser.model_metakey(name, 'layers')])
+            library = metacol['library']
+            library_version = metacol['libraryVersion']
+            longest = int(metacol['longest'])
+            dtypes = parser.destringify(metacol['dtypes'])
+            num_layers = int(metacol['numLayers'])
+            layers = parser.destringify(metacol['layers'])
 
             shapeKey = parser.model_shapekey(name, longest)
-            shape_aset = co.arraysets[shapeKey]
+            shape_aset = co.columns[shapeKey]
             weights = []
             for i in range(num_layers):
                 modelKey = parser.modelkey(name, longest, dtypes[i])
-                aset = co.arraysets[modelKey]
+                aset = co.columns[modelKey]
                 w = aset[i].reshape(np.array(shape_aset[i]))
                 weights.append(w)
             if library == 'torch':

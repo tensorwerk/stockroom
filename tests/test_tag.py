@@ -14,3 +14,13 @@ def test_basic(stock):
 def test_save_string(stock):
     with pytest.raises(TypeError):
         stock.tag['wrongdata'] = bytes('hi')
+
+
+@pytest.mark.skip(reason="Commit level metadata needs to be implemented in hangar")
+def test_no_commit_history(stock):
+    stock.tag['lr'] = 0
+    stock.commit('adding lr')
+    stock.tag['key'] = 'val'
+    stock.commit('adding someval')
+    with pytest.raises(KeyError):
+        stock.tag['lr']

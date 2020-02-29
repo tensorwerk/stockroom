@@ -5,8 +5,8 @@ PREFIX = '_STK'
 # ===================================================================
 #         Metadata & Column key parsers for model store
 # ===================================================================
-def model_metakey(model, name):
-    return f"{PREFIX}{SEP}{model}{SEP}{name}"
+def model_metakey(name):
+    return f"{PREFIX}{SEP}{name}{SEP}meta"
 
 
 def modelkey(name, longest, dtype):

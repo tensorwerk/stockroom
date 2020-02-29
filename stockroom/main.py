@@ -93,7 +93,8 @@ class StockRoom:
             self._repo.open_global_checkout(write)
             yield None
         finally:
-            self._repo.close_global_checkout()
+            if self._repo.is_optimized:
+                self._repo.close_global_checkout()
 
     def commit(self, message: str) -> str:
         """

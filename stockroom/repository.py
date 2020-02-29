@@ -35,7 +35,7 @@ class StockRepository:
 
         if write:
             self._optimized_Wcheckout = self._hangar_repo.checkout(write=True)
-            if self._optimized_Wcheckout.commit_hash != head_commit:
+            if head_commit and self._optimized_Wcheckout.commit_hash != head_commit:
                 self._optimized_Wcheckout.close()
                 raise RuntimeError("Writing on top of the old commit's are not allowed. "
                                    "Checkout to the latest commit")
@@ -91,7 +91,7 @@ class StockRepository:
         else:
             head_commit = get_current_head(self._root)
             co = self._hangar_repo.checkout(write=True)
-            if co.commit_hash != head_commit:
+            if head_commit and co.commit_hash != head_commit:
                 co.close()
                 raise RuntimeError("Writing on top of the old commit's are not allowed. "
                                    "Checkout to the latest commit")
