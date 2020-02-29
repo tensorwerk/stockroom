@@ -28,7 +28,7 @@ def test_init_repo():
         stock = StockRoom()
 
 
-def test_commit(repo_with_aset):
+def test_commit(repo_with_col):
     runner = CliRunner()
     stock = StockRoom()
     stock.tag['key'] = 'value'

@@ -75,16 +75,16 @@ class Model:
                         modelKey, longest, np.dtype(dtypes[i]), variable_shape=True)
             # ---------------------------------------------------------
 
-            shape_aset = co.columns[shapeKey]
+            shape_col = co.columns[shapeKey]
             for i, w in enumerate(weights):
-                model_aset = co.columns[parser.modelkey(name, longest, dtypes[i])]
-                model_aset[i] = w.reshape(-1)
+                model_col = co.columns[parser.modelkey(name, longest, dtypes[i])]
+                model_col[i] = w.reshape(-1)
                 if w.shape:
-                    shape_aset[i] = np.array(w.shape)
+                    shape_col[i] = np.array(w.shape)
                 else:
                     # C long = int32 in win64; int64 elsewhere
                     shape_typ = np.array(1).dtype
-                    shape_aset[i] = np.array(()).astype(shape_typ)
+                    shape_col[i] = np.array(()).astype(shape_typ)
 
     def __getitem__(self, name):
         with self._repo.read_checkout() as co:
@@ -101,12 +101,12 @@ class Model:
             layers = parser.destringify(metacol['layers'])
 
             shapeKey = parser.model_shapekey(name, longest)
-            shape_aset = co.columns[shapeKey]
+            shape_col = co.columns[shapeKey]
             weights = []
             for i in range(num_layers):
                 modelKey = parser.modelkey(name, longest, dtypes[i])
-                aset = co.columns[modelKey]
-                w = aset[i].reshape(np.array(shape_aset[i]))
+                col = co.columns[modelKey]
+                w = col[i].reshape(np.array(shape_col[i]))
                 weights.append(w)
             if library == 'torch':
                 if torch.__version__ != library_version:

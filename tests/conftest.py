@@ -30,19 +30,19 @@ def repo(monkeypatch, managed_tmpdir):
 
 
 @pytest.fixture()
-def repo_with_aset(repo):
+def repo_with_col(repo):
     repo = hangar.Repository(Path.cwd())
     co = repo.checkout(write=True)
     arr = np.arange(20).reshape(4, 5)
-    co.add_ndarray_column('aset', prototype=arr)
-    co.commit('init aset')
+    co.add_ndarray_column('ndcol', prototype=arr)
+    co.commit('init column')
     co.close()
     yield None
     repo._env._close_environments()
 
 
 @pytest.fixture()
-def stock(repo_with_aset):
+def stock(repo_with_col):
     stock_obj = StockRoom()
     yield stock_obj
     stock_obj._repo.hangar_repository._env._close_environments()

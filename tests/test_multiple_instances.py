@@ -13,12 +13,12 @@ class TestSameProcess:
         oldarr = arr * randint(1, 100)
         newarr = arr * randint(1, 100)
 
-        stock.data['aset', 1] = oldarr
-        stock2.data['aset', 1] = newarr
+        stock.data['ndcol', 1] = oldarr
+        stock2.data['ndcol', 1] = newarr
         stock.commit('added data')
 
-        assert np.allclose(stock2.data['aset', 1], newarr)
-        assert not np.allclose(stock2.data['aset', 1], oldarr)
+        assert np.allclose(stock2.data['ndcol', 1], newarr)
+        assert not np.allclose(stock2.data['ndcol', 1], oldarr)
         stock2._repo.hangar_repository._env._close_environments()
 
     def test_one_in_write_contextmanager(self, stock):
@@ -41,20 +41,20 @@ class TestSameProcess:
                     pass
 
             with pytest.raises(PermissionError):
-                stock2.data['aset', 1] = oldarr
+                stock2.data['ndcol', 1] = oldarr
 
-            stock.data['aset', 1] = oldarr
+            stock.data['ndcol', 1] = oldarr
             stock.commit('adding data inside cm')
 
             with pytest.raises(KeyError):
                 # TODO: document this scenario
-                data = stock.data['aset', 1]
+                data = stock.data['ndcol', 1]
 
             stock3 = StockRoom()
             assert stock3._repo._optimized_Rcheckout is None
             assert stock3._repo._optimized_Wcheckout is None
 
-        assert np.allclose(oldarr, stock.data['aset', 1])
+        assert np.allclose(oldarr, stock.data['ndcol', 1])
         stock2._repo.hangar_repository._env._close_environments()
         stock3._repo.hangar_repository._env._close_environments()
 
@@ -63,7 +63,7 @@ class TestSameProcess:
         arr = np.arange(20).reshape(4, 5)
 
         with stock.optimize():
-            stock2.data['aset', 1] = arr
+            stock2.data['ndcol', 1] = arr
             stock2.commit('adding data')
 
             with stock2.optimize(write=True):
@@ -72,8 +72,8 @@ class TestSameProcess:
                 assert stock._repo._optimized_Rcheckout is not None
                 assert stock._repo._optimized_Wcheckout is None
 
-                stock2.data['aset', 2] = arr
+                stock2.data['ndcol', 2] = arr
                 stock2.commit('adding data')
-        assert np.allclose(stock.data['aset', 1], arr)
-        assert np.allclose(stock.data['aset', 2], arr)
+        assert np.allclose(stock.data['ndcol', 1], arr)
+        assert np.allclose(stock.data['ndcol', 2], arr)
         stock2._repo.hangar_repository._env._close_environments()

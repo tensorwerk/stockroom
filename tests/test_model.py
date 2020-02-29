@@ -59,6 +59,22 @@ class TestTorchModelStore:
             assert np.allclose(old_state[k], new_state[k])
             assert not np.allclose(tmp_state[k], new_state[k])
 
+    def test_saving_two_models(self, stock):
+        torch_model1 = self.get_new_model()
+        torch_model2 = self.get_new_model()
+        state1 = torch_model1.state_dict()
+        state2 = torch_model2.state_dict()
+        stock.model[1] = state1
+        stock.model[2] = state2
+        stock.commit('adding two models')
+        ret_state1 = stock.model[1]
+        ret_state2 = stock.model[2]
+        torch_model1.load_state_dict(ret_state1)
+        torch_model2.load_state_dict(ret_state2)
+        for k in state1.keys():
+            assert np.allclose(ret_state1[k], state1[k])
+            assert np.allclose(ret_state2[k], state2[k])
+
     def test_load_with_different_library_version(self, stock, monkeypatch):
         import torch
         torch_model = self.get_new_model()
