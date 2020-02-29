@@ -60,21 +60,21 @@ class Model:
             co.metadata[parser.model_metakey(name, 'numLayers')] = str(len(weights))
             co.metadata[parser.model_metakey(name, 'layers')] = parser.stringify(layers)
 
-            # ---------- Create arraysets if not exist -----------------
+            # ---------- Create columns if not exist -----------------
             shapeKey = parser.model_shapekey(name, str(longest))
-            if shapeKey not in co.arraysets.keys():
+            if shapeKey not in co.columns.keys():
                 shape_typ = np.array(1).dtype  # C long = int32 in win64; int64 elsewhere
-                co.arraysets.init_arrayset(shapeKey, 10, shape_typ, variable_shape=True)
+                co.add_ndarray_column(shapeKey, 10, shape_typ, variable_shape=True)
             for i, w in enumerate(weights):
                 modelKey = parser.modelkey(name, str(longest), dtypes[i])
-                if modelKey not in co.arraysets.keys():
-                    co.arraysets.init_arrayset(
+                if modelKey not in co.columns.keys():
+                    co.add_ndarray_column(
                         modelKey, longest, np.dtype(dtypes[i]), variable_shape=True)
             # ---------------------------------------------------------
 
-            shape_aset = co.arraysets[shapeKey]
+            shape_aset = co.columns[shapeKey]
             for i, w in enumerate(weights):
-                model_aset = co.arraysets[parser.modelkey(name, longest, dtypes[i])]
+                model_aset = co.columns[parser.modelkey(name, longest, dtypes[i])]
                 model_aset[i] = w.reshape(-1)
                 if w.shape:
                     shape_aset[i] = np.array(w.shape)

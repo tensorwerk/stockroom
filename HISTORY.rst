@@ -13,8 +13,8 @@ Improvements
 * Global read optimization
   (`#11 <https://github.com/tensorwerk/stockroom/pull/11>`__) `@hhsecond <https://github.com/hhecond>`__
 
-* Integrated hangar's new column API
-  (`#)
+* Hangar's new column API
+  (`#12 <https://github.com/tensorwerk/stockroom/pull/12>`__) `@hhsecond <https://github.com/hhecond>`__
 
 
 v0.1.0_ (2019-12-12)
