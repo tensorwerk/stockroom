@@ -94,7 +94,6 @@ class StockRoom:
             self._stock_repo.open_global_writer()
             yield
         finally:
-            # this guard is necessary if exception while opening checkout
             if self._stock_repo.is_write_optimized:
                 self._stock_repo.close_global_writer()
 
@@ -105,7 +104,6 @@ class StockRoom:
         close after the commit. Which means, no other write operations should be running
         while stock commit is in progress
         """
-        # TODO: should we update the head here? If update, change the test cases too
         with self._stock_repo.get_writer_cm() as writer:
             digest = writer.commit(message)
         set_current_head(self._stock_repo.stockroot, digest)

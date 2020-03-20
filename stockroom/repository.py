@@ -5,8 +5,8 @@ from hangar import Repository
 from .utils import get_current_head
 
 
-class Reader:
-    # TODO: explain the need
+class LazyReader:
+    # TODO: explain the need & write test cases
     def __get__(self, stock, obj_type=None) -> object:
         if 'reader' not in stock.__dict__:
             stock.__dict__['reader'] = stock.hangar_repo.checkout(commit=stock.head)
@@ -25,16 +25,20 @@ class StockRepository:
     instantiation.
     """
 
-    reader = Reader()
+    reader = LazyReader()
 
     def __init__(self, root):
         self._root = root
         self.head = get_current_head(self._root)
         self.hangar_repo = Repository(root)
-        # TODO: Write test cases for read optimized always
-        if self.head:
-            self.reader = self.hangar_repo.checkout(commit=self.head).__enter__()
         self._writer = None
+
+    @property
+    def stockroot(self) -> Path:
+        """
+        Returns the root of stock repository
+        """
+        return self._root
 
     @property
     def is_write_optimized(self):
@@ -56,8 +60,6 @@ class StockRepository:
 
     @contextmanager
     def get_writer_cm(self):
-        # TODO: Do the function assignment as at the time of global checkout creation and
-        # check if that improves time
         """
         An API similar to hangar checkout in write mode but does the closure of checkout
         on the exit of CM. It also monitors the existence of global checkout and open
@@ -77,14 +79,8 @@ class StockRepository:
             if self._writer is None:
                 co.close()
 
-    @property
-    def stockroot(self) -> Path:
-        """
-        Returns the root of stock repository
-        """
-        return self._root
-
     def update_head(self):
+        # TODO: test this
         self.head = get_current_head(self._root)
         self.reader.__exit__()
         self.reader.close()

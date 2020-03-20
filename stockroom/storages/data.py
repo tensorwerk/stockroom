@@ -1,6 +1,26 @@
 from ..repository import StockRepository
 
 
+class Column:
+    """
+    Column wrapper object which will be returned to user from the :class: `Data` storage.
+    All the sample access and write is enabled only thorugh this class. This might change
+    in the future.
+    """
+    def __init__(self, name, repo):
+        self.name = name
+        self._stock_repo = repo
+        self._column = self._stock_repo.reader[name]
+
+    def __getitem__(self, sample_key):
+        return self._column[sample_key]
+
+    def __setitem__(self, sample_key, value):
+        with self._stock_repo.get_writer_cm() as writer:
+            col = writer[self.name]
+            col[sample_key] = value
+
+
 class Data:
     """
     Data storage is essentially a wrapper over hangar's column API which let stockroom
@@ -18,20 +38,21 @@ class Data:
     Examples
     --------
     >>> stock = StockRoom()
-    >>> stock.data['column1', 'sample1'] = np.arange(20).reshape(5, 4)
-    >>> sample = stock.data['column1', 'sample5']
+    >>> stock.data['column1']['sample1'] = np.arange(20).reshape(5, 4)
+    >>> sample = stock.data['column1']['sample5']
 
     Inside context manager
 
     >>> with stock.optimize():
-    ...     sample = stock.data['coloumn1', 'sample1']
+    ...     sample = stock.data['coloumn1']['sample1']
     """
     def __init__(self, repo: StockRepository):
         self._stock_repo = repo
 
     def __setitem__(self, key, value):
-        with self._stock_repo.get_writer_cm() as writer:
-            writer[key] = value
+        raise RuntimeError("Data storage does not take sample values. Add data to your "
+                           "column. Ex: ``stock.data[column][sample] = array``")
 
     def __getitem__(self, key):
-        return self._stock_repo.reader[key]
+        self.__dict__[key] = Column(key, self._stock_repo)
+        return self.__dict__[key]
