@@ -57,6 +57,8 @@ class Model:
             metakey = parser.model_metakey(name)
             if metakey not in writer.columns.keys():
                 metacol = writer.add_str_column(metakey)
+            else:
+                metacol = writer.columns[metakey]
             metacol['library'] = library
             metacol['libraryVersion'] = library_version
             metacol['longest'] = str(longest)
