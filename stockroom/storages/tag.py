@@ -1,5 +1,8 @@
 from .. import parser
 from ..repository import StockRepository
+from ..diff import TagDiff
+
+from typing import NamedTuple
 
 
 class Tag:
@@ -48,3 +51,8 @@ class Tag:
         except KeyError:
             raise KeyError(f"Data tampering suspected. Could not "
                            f"read the data type {value_type}")
+
+    def diff(self, ref_commit:str = None, dest_commit: str = None) -> TagDiff:
+        diff = TagDiff(ref_commit, dest_commit)
+        return diff
+
