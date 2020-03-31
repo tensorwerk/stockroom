@@ -52,7 +52,7 @@ class Tag:
             raise KeyError(f"Data tampering suspected. Could not "
                            f"read the data type {value_type}")
 
-    def diff(self, ref_commit:str = None, dest_commit: str = None) -> TagDiff:
+    def diff(self, ref_commit:str = None, dest_commit: str = None, root='.') -> TagDiff:
         diff = TagDiff(ref_commit, dest_commit)
         return diff
 
