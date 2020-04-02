@@ -32,6 +32,9 @@ class TagDiff:
         self.parse_diff()
 
     def gen_tables(self):
+    """
+    Generate the Rich Table using parsed data.
+    """
 
         table = Table(title='Diff %s..%s'%(self.ref_commit[2:7], self.dest_commit[2:7]))
 
@@ -59,6 +62,10 @@ class TagDiff:
         return table
 
     def parse_diff(self):
+        """
+        Parse the hangar.diff and store the changes in the TagDiff object
+        """
+
         print('Accessing ref_commit')
         ref_checkout = self.repo.checkout(commit = self.ref_commit)
 
