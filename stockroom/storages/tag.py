@@ -53,6 +53,6 @@ class Tag:
                            f"read the data type {value_type}")
 
     def diff(self, ref_commit:str = None, dest_commit: str = None, root='.') -> TagDiff:
-        diff = TagDiff(ref_commit, dest_commit)
+        diff = TagDiff(ref_commit, dest_commit, root = root)
         return diff
 
