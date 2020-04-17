@@ -8,18 +8,23 @@ from rich.console import Console
 
 from .parser import tagkey, SEP
 
+
 class ParsedDiff(NamedTuple):
     tagName: str
     ref_sample: str = ''
     dest_samples: list = list()
+
 
 class TagDiff:
     """
     The Diff object for tags
     """
 
-    def __init__(self, ref_commit: str = None, dest_commit: str = None,
-                    root: str = None):
+    def __init__(self,
+                 ref_commit: str = None,
+                 dest_commit: str = None,
+                 root: str = None):
+
         self.ref_commit = ref_commit
         self.dest_commit = dest_commit
         self.repo = Repository(root)
@@ -32,14 +37,15 @@ class TagDiff:
         self.parse_diff()
 
     def gen_tables(self):
-    """
-    Generate the Rich Table using parsed data.
-    """
+        """
+        Generate the Rich Table using parsed data.
+        """
 
-        table = Table(title='Diff %s..%s'%(self.ref_commit[2:7], self.dest_commit[2:7]))
+        table = Table(title=f'Diff {self.ref_commit[2:7]}..\
+                {self.dest_commit[2:7]}')
 
         # Generate Columns
-        column_headings = ['Tags'] + [self.ref_commit, self.dest_commit]
+        column_headings = ['Tags' + self.ref_commit, self.dest_commit]
         for column in column_headings:
             table.add_column(column[:10], no_wrap=True)
 
@@ -49,14 +55,14 @@ class TagDiff:
             dest_row = ""
 
             if row in self._added:
-                dest_row = "[green] %s [/green]"%(self._added[row])
+                dest_row = f"[green] {self._added[row]} [/green]"
 
             elif row in self._mutated:
-                ref_row = "[red] %s [/red]"%(self._mutated[row][0])
-                dest_row = "[red] %s [/red]"%(self._mutated[row][1])
+                ref_row = f"[red] {self._mutated[row][0]} [/red]"
+                dest_row = f"[red] {self._mutated[row][1]} [/red]"
 
             elif row in self._deleted:
-                ref_row = "[green] %s [/green]"%(self._deleted[row])
+                ref_row = f"[green] {self._deleted[row]} [/green]"
 
             table.add_row(row, ref_row, dest_row)
         return table
@@ -67,10 +73,10 @@ class TagDiff:
         """
 
         print('Accessing ref_commit')
-        ref_checkout = self.repo.checkout(commit = self.ref_commit)
+        ref_checkout = self.repo.checkout(commit=self.ref_commit)
 
         print("Accessing def_commit")
-        dest_checkout = self.repo.checkout(commit = self.dest_commit)
+        dest_checkout = self.repo.checkout(commit=self.dest_commit)
         diff = ref_checkout.diff.commit(self.dest_commit).diff
 
         # Get all the keys in both checkouts
@@ -88,7 +94,7 @@ class TagDiff:
         self.all_keys = all_keys
 
         if len(diff.added.metadata) > 0:
-            for keyRecord  in diff.added.metadata:
+            for keyRecord in diff.added.metadata:
                 key = keyRecord.key.split(SEP)[-1]
                 if key != "type":
                     keyvalue = dest_checkout.metadata[tagkey(key)]
@@ -123,4 +129,3 @@ class TagDiff:
 
     def _repr_html_(self):
         return print(self.gen_tables())._repr_html_()
-
