@@ -1,0 +1,42 @@
+site_name: stockroom
+site_description: Version control for software 2.0
+site_url: https://stockroom.page
+extra_css:
+  - stylesheets/extra.css
+  - stylesheets/termynal.css
+extra_javascript:
+  - js/termynal.js
+  - js/custom.js
+theme:
+  name: material
+  logo: img/logo_white.png
+  favicon: img/favicon.ico
+  language: en
+repo_name: tensorwerk/stockroom
+repo_url: https://github.com/tensorwerk/stockroom
+edit_uri: ''
+google_analytics:
+- UA-174064309-1
+- auto
+plugins:
+- search
+- markdownextradata:
+    data: data
+markdown_extensions:
+- markdown.extensions.codehilite:
+    guess_lang: false
+- codehilite:
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/tensorwerk/stockroom
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/__stockroom__
+    - icon: fontawesome/brands/medium
+      link: https://medium.com/@tensorwerk
+    - icon: fontawesome/solid/globe
+      link: https://tensorwerk.com
+nav:
+- stockroom: index.md
+- Languages:
+  - en: /
