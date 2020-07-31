@@ -1,6 +1,8 @@
-import pytest
 from pathlib import Path
+
+import pytest
 from click.testing import CliRunner
+
 import stockroom.cli as cli
 from stockroom import StockRoom
 
@@ -17,7 +19,7 @@ def test_init_repo():
     runner = CliRunner()
     with runner.isolated_filesystem():
         with pytest.raises(RuntimeError):
-            stock = StockRoom()
+            StockRoom()
         res = runner.invoke(cli.init, ['--name', 'test', '--email', 'test@foo.com'])
         assert 'Error: stock init should execute only in a git repository' in res.output
 
@@ -25,16 +27,18 @@ def test_init_repo():
         cwd.joinpath('.git').mkdir(exist_ok=True)
         res = runner.invoke(cli.init, ['--name', 'test', '--email', 'test@foo.com'])
         assert res.exit_code == 0
-        stock = StockRoom()
+        StockRoom()
 
 
-def test_commit(repo_with_aset):
+def test_commit(repo_with_col):
     runner = CliRunner()
-    stock = StockRoom()
-    stock.tag['key'] = 'value'
+    stock = StockRoom(write=True)
+    stock.experiment['key'] = 'value'
+    stock.close()
     res = runner.invoke(cli.commit, [])
     assert 'Error: Require commit message\n' in res.stdout
     res = runner.invoke(cli.commit, ['-m', 'test commit'])
     assert res.exit_code == 0
-    assert 'Commit message:\ntest commit\nCommit Successful. Digest' in res.stdout
-    stock._repo.hangar_repository._env._close_environments()
+    assert 'Commit message:\ntest commit' in res.stdout
+    assert 'Commit Successful. Digest' in res.stdout
+    stock._repo._env._close_environments()
