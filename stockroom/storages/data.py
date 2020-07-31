@@ -1,4 +1,3 @@
-
 class Data:
     """
     Data storage is essentially a wrapper over hangar's column API which let stockroom
@@ -16,21 +15,23 @@ class Data:
     Examples
     --------
     >>> stock = StockRoom()
-    >>> stock.data['column1', 'sample1'] = np.arange(20).reshape(5, 4)
-    >>> sample = stock.data['column1', 'sample5']
+    >>> stock.data['column1']['sample1'] = np.arange(20).reshape(5, 4)
+    >>> sample = stock.data['column1']['sample5']
 
     Inside context manager
 
-    >>> with stock.optimize():
-    ...     sample = stock.data['coloumn1', 'sample1']
+    >>> with stock.run():
+    ...     sample = stock.data['coloumn1']['sample1']
     """
-    def __init__(self, repo):
-        self._repo = repo
+    def __init__(self, accessor):
+        self.accessor = accessor
+
+    def __getattr__(self, item):
+        # TODO: guard for non-allowed
+        return getattr(self.accessor, item)
 
     def __setitem__(self, key, value):
-        with self._repo.write_checkout() as co:
-            co[key] = value
+        self.accessor[key] = value
 
     def __getitem__(self, key):
-        with self._repo.read_checkout() as co:
-            return co[key]
+        return self.accessor[key]

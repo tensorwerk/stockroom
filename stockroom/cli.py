@@ -1,7 +1,7 @@
 import click
-from .repository import init_repo
-from .main import StockRoom
-from . import __version__
+from stockroom.keeper import init_repo
+from stockroom.core import StockRoom
+from stockroom import __version__
 
 
 @click.group(no_args_is_help=True, add_help_option=True, invoke_without_command=True)
@@ -45,7 +45,9 @@ def commit(message):
     """
     if len(message) < 1:
         raise click.ClickException(ValueError("Require commit message"))
-    stock = StockRoom()
+    # TODO: There should be a way to share the write enabled checkout if user wanna commit
+    #   let's say when he has a writer checkout open in jupyter notebook
+    stock = StockRoom(write=True)
     msg = '\n'.join(message)
     click.echo('Commit message:\n' + msg)
     try:
