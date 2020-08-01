@@ -3,7 +3,7 @@ import shutil
 import pytest
 import hangar
 import numpy as np
-from stockroom import StockRoom, init_repo
+from stockroom import StockRoom, keeper
 
 
 @pytest.fixture()
@@ -25,24 +25,24 @@ def repo(monkeypatch, managed_tmpdir):
     monkeypatch.setattr(Path, 'cwd', lambda: cwd)
     cwd.joinpath(".git").mkdir()
     cwd.joinpath(".gitignore").touch()
-    init_repo('s', 'a@b.c', overwrite=True)
+    keeper.init_repo('s', 'a@b.c', overwrite=True)
     yield None
 
 
 @pytest.fixture()
-def repo_with_aset(repo):
+def repo_with_col(repo):
     repo = hangar.Repository(Path.cwd())
     co = repo.checkout(write=True)
     arr = np.arange(20).reshape(4, 5)
-    co.arraysets.init_arrayset('aset', prototype=arr)
-    co.commit('init aset')
+    co.add_ndarray_column('ndcol', prototype=arr)
+    co.commit('init column')
     co.close()
     yield None
     repo._env._close_environments()
 
 
 @pytest.fixture()
-def stock(repo_with_aset):
-    stock_obj = StockRoom()
+def writer_stock(repo_with_col):
+    stock_obj = StockRoom(write=True)
     yield stock_obj
-    stock_obj._repo.hangar_repository._env._close_environments()
+    stock_obj._repo._env._close_environments()

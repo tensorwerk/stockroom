@@ -50,35 +50,31 @@ class TestInit:
 
 
 class TestCommit:
-    def test_basic(self, stock):
-        stock.tag['key1'] = 'value'
-        stock.commit('generic data')
-        assert stock.tag['key1'] == 'value'
-        stock.tag['key2'] = 'value2'
-        with pytest.raises(KeyError):
-            stock.tag['key2']
+    def test_basic(self, writer_stock):
+        writer_stock.experiment['key1'] = 'value'
+        writer_stock.commit('generic data')
+        assert writer_stock.experiment['key1'] == 'value'
+        writer_stock.experiment['key2'] = 'value2'
 
-    def test_commit_hash(self, stock):
-        stock.tag['key1'] = 'value'
-        stock.commit('generic data')
-        with open(stock._repo.stockroot/'head.stock') as f:
+    def test_commit_hash(self, writer_stock):
+        writer_stock.experiment['key1'] = 'value'
+        writer_stock.commit('generic data')
+        with open(writer_stock.stockroot/'head.stock') as f:
             digest1 = f.read()
-        stock.tag['key2'] = 'value2'
-        stock.commit('generic data 2')
-        with open(stock._repo.stockroot/'head.stock') as f:
+        writer_stock.experiment['key2'] = 'value2'
+        writer_stock.commit('generic data 2')
+        with open(writer_stock.stockroot/'head.stock') as f:
             digest2 = f.read()
-        log = stock._repo._hangar_repo.log(return_contents=True)
+        log = writer_stock._repo.log(return_contents=True)
         log['order'].pop()  # removing the digest from conftest.py
         assert log['order'] == [digest2, digest1]
 
 
-def test_hangar_checkout_from_stock_obj(stock):
-    co = stock.get_hangar_checkout()
-    assert isinstance(co, hangar.checkout.ReaderCheckout)
-    co = stock.get_hangar_checkout(write=True)
+def test_hangar_checkout_from_stock_obj(writer_stock):
+    co = writer_stock.accessor
+    assert isinstance(co, hangar.checkout.WriterCheckout)
     assert hasattr(co, '_writer_lock')
 
-    with pytest.raises(PermissionError):
-        # TODO: document this scenario
-        stock.tag['key1'] = 'value'
     co.close()
+    with pytest.raises(PermissionError):
+        writer_stock.experiment['key1'] = 'value'
