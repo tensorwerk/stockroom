@@ -6,9 +6,9 @@ extra_css:
   - stylesheets/termynal.css
 extra_javascript:
   - js/termynal.js
-  - js/custom.js
-  - https://sidecar.gitter.im/dist/sidecar.v1.js
   - js/chat.js
+  - https://sidecar.gitter.im/dist/sidecar.v1.js
+  - js/custom.js
 theme:
   name: material
   logo: img/logo_white.png
