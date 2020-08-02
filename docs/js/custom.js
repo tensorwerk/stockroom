@@ -16,7 +16,6 @@ function setupTermynal() {
     let termynals = [];
 
     function createTermynals() {
-        console.log(termynalActivateClass)
         document
             .querySelectorAll(`.${termynalActivateClass}`)
             .forEach(node => {
