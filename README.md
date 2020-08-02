@@ -7,9 +7,6 @@
 [![PyPi](https://img.shields.io/pypi/v/stockroom?style=for-the-badge)](https://pypi.python.org/pypi/stockroom)
 [![lgtm](https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge)](https://lgtm.com/projects/g/tensorwerk/stockroom/)
 
-Stockroom is a platform to version models, data, parameters, metrics etc. alongside git
-versioned source code.
-
 A version control system for software 2.0.
 
 # Introduction
