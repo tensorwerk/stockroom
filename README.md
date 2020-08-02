@@ -4,10 +4,17 @@
 </div>
 
 
+![Gitter](https://img.shields.io/gitter/room/tensorwerk/stockroom?color=%2332a877&style=for-the-badge)
 [![PyPi](https://img.shields.io/pypi/v/stockroom?style=for-the-badge)](https://pypi.python.org/pypi/stockroom)
 [![lgtm](https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge)](https://lgtm.com/projects/g/tensorwerk/stockroom/)
 
 A version control system for software 2.0.
+
+---
+
+**Complete Documentation**: [stockroom.page](https://stockroom.page)
+
+---
 
 # Introduction
 Stockroom is a platform to version models, data, parameters, experiment artifacts etc. alongside git
@@ -50,6 +57,19 @@ around when you traverse between commits.
 ```console
 $ pip install stockroom
 ```
+
+## Contributing
+We'd love to have you in the contributors list. Do check out the [contributors guide]() before submitting a PR.
+We recognize and celebrate each contributions in different ways we can; here is our latest #Hall-Of-Fame
+
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/0)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/0)
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/1)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/1)
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/2)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/2)
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/3)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/3)
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/4)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/4)
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/5)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/5)
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/6)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/6)
+[![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/7)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/7)
 
 ## License
 
