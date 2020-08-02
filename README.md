@@ -5,41 +5,33 @@
 
 
 [![PyPi](https://img.shields.io/pypi/v/stockroom?style=for-the-badge)](https://pypi.python.org/pypi/stockroom)
-[![CodeCov](https://img.shields.io/codecov/c/github/tensorwerk/stockroom?style=for-the-badge)](https://codecov.io/gh/tensorwerk/stockroom/)
 [![lgtm](https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge)](https://lgtm.com/projects/g/tensorwerk/stockroom/)
 
 Stockroom is a platform to version models, data, parameters, metrics etc. alongside git
-versioned source code. It is licensed as a Free software under
-**Apache Software License 2.0**
+versioned source code.
+
+A version control system for software 2.0.
 
 # Introduction
-Stockroom is built on top of [hangar](https://github.com/tensorwerk/hangar-py) & hence
-is high performing. It abstracts away few hangar APIs by making assumptions and 
-operating implicitly. One good example for such implicit decision-making is the
-"checkout management". Stockroom, as a package, is not self-contained and whenever
-possible, off load the heavy lifting to hangar's well written APIs. However,
-the tutorials and documentations are self-contained to make sure users
-doesn't have to run through different places to start working on stockroom.
+Stockroom is a platform to version models, data, parameters, experiment artifacts etc. alongside git
+versioned source code.
 
+- It is **easy**. The APIs are very similar to dictionaries in python
+- It **works alongside Git** - in case you need to version source code as well. It's OK if you don't.
+- **High performance**, thanks to the amazing [hangar](https://github.com/tensorwerk/hangar-py) library
+- [Upcoming] Tight **integration with PyTorch**. So that you don't need to write the complex pipeline code.  
 
 # Why
 One important motivation behind the initial design of stockroom is to avoid users
-learning another tool for versioning. We try to make the APIs as minimal and familiar as
-possible while relying on other popular tools such as git & hangar. Stockroom let "git"
-does ``checkout`` and rely on "git" to move between branches/commits. This allows
-stockroom to present a very simple and intuitive API collection to the user
-while avoiding the need of user learning another set of commands otherwise they'd need.
-In a nutshell, Stockroom exists for three reasons
-
-- Work hand-in-hand with git
-- Make it possible to version model, data, hyper-parameters metrics etc.
-- Making versioning easy for [software 2.0](https://medium.com/@karpathy/software-2-0-a64152b37c35) stack
+learning another tool for versioning. We try to make the APIs as minimal and familiar
+as possible. Similar to other versioning tools, stockroom let "git" does ``checkout``
+and rely on "git" to move between branches/commits. But unlike other tools, we channel
+your data access through the smart API so that we don't need to move the huge data files
+around when you traverse between commits.   
 
 
 
 ## Example
-.. code-block:: python
-
     from stockroom import StockRoom
     import numpy as np
 
@@ -55,3 +47,13 @@ In a nutshell, Stockroom exists for three reasons
                 stock.model['resnet50'] = get_weights(model)
                 stock.commit('adding a better model)
 
+
+## Installation
+
+```console
+$ pip install stockroom
+```
+
+## License
+
+This project is licensed under the terms of the **Apache Software License 2.0**
