@@ -36,21 +36,25 @@ around when you traverse between commits.
 
 
 ## Example
-    from stockroom import StockRoom
-    import numpy as np
+```python
+from stockroom import StockRoom
 
-    stock = StockRoom()
-    weights = stock.model['resnet50']
-    model = make_model(weights)
-    for e in range(epochs):
-        for i in range(limit):
-            x, y = stock.data['dataset', i]
-            out = model(x)
-            update_weights(out, y)
-            if loss < previous_loss:
-                stock.model['resnet50'] = get_weights(model)
-                stock.commit('adding a better model)
-
+stock = StockRoom()
+weights = stock.model['resnet50']
+model.load_state_dict(weights)
+for e in range(epochs):
+    for i in range(limit):
+        optimizer.zero_grad()
+        x, y = stock.data['dataset_name', i]
+        out = model(x)
+        loss = criterion(out, y)
+        loss.backward()
+        optimizer.step()
+        if loss < previous_loss:
+            stock.experiment['loss'] = loss.item()
+            stock.model['resnet50'] = model.state_dict()
+            stock.commit('adding a better model')
+```
 
 ## Installation
 
@@ -60,7 +64,7 @@ $ pip install stockroom
 
 ## Contributing
 We'd love to have you in the contributors list. Do check out the [contributors guide]() before submitting a PR.
-We recognize and celebrate each contributions in different ways we can; here is our latest #Hall-Of-Fame
+Here is our latest #Hall-Of-Fame
 
 [![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/0)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/0)
 [![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/1)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/1)

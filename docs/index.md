@@ -11,6 +11,7 @@
 
 A version control system for software 2.0.
 
+
 # Introduction
 Stockroom is a platform to version models, data, parameters, experiment artifacts etc. alongside git
 versioned source code.
@@ -29,26 +30,6 @@ your data access through the smart API so that we don't need to move the huge da
 around when you traverse between commits.   
 
 
-
-## Example
-```Python hl_lines="4 6 9 13 14"
-from stockroom import StockRoom
-import numpy as np
-
-stock = StockRoom()
-weights = stock.model['resnet50']
-model.load_state_dict(weights)
-for e in range(epochs):
-    for i in range(limit):
-        x, y = stock.data['dataset_name', i]
-        out = model(x)
-        update_weights(out, y)
-        if loss < previous_loss:
-            stock.model['resnet50'] = model.state_dict()
-            stock.commit('adding a better model)
-
-```
-
 ## Installation
 
 <div class="termy">
@@ -61,10 +42,31 @@ $ pip install stockroom
 </div>
 
 
+
+## Example
+```Python hl_lines="3 4 8 14 15 16"
+from stockroom import StockRoom
+
+stock = StockRoom(write=True)
+model.load_state_dict(stock.model['resnet50'])
+for e in range(epochs):
+    for i in range(limit):
+        optimizer.zero_grad()
+        x, y = stock.data['dataset_name', i]
+        out = model(x)
+        loss = criterion(out, y)
+        loss.backward()
+        optimizer.step()
+        if loss < previous_loss:
+            stock.experiment['loss'] = loss.item()
+            stock.model['resnet50'] = model.state_dict()
+            stock.commit('adding a better model')
+```
+
 ## Contributing
 
 We'd love to have you in the contributors list. Do check out the [contributor's guide]() before submitting a PR.
-We recognize and celebrate each contributions in possible ways we can; here is our latest #Hall-Of-Fame
+Here is our latest #Hall-Of-Fame
 
 [![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/0)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/0)
 [![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/1)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/1)
