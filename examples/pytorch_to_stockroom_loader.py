@@ -1,4 +1,4 @@
-import argparse
+import click
 from pathlib import Path
 from typing import Union
 
@@ -92,13 +92,26 @@ def add_from_dataset(
                 for column, item in zip(columns_added, sample):
                     stock.data[column][i] = hangar_transform(item)
 
-def main(args):
+@click.command()
+@click.argument('dataset')
+@click.option('--root', '-r',
+               help='The root directory where the Repository should be created')
+@click.option('--download-dir', '-d', default=False,
+              help=('If you have the dataset downloaded or want to download it'
+                    'to a diffent path, pass it here'))
+def download(dataset, root, download_dir):
+    """
+    Downloads Pytorch datasets and creates and loads them into a StockRoom
+    repo for you. Currently the following datasets are supported.
+
+    1. torchvison - Mnist, Cifar10, Fashion-mnist.
+    """
 
     # build the config for the Dataset
-    dataset_config = dataset_configs[args.dataset]
-    if args.download_dir is False:
-        args.download_dir = args.root
-    d_names, kwargs = dataset_config.gen_kwargs(args.download_dir)
+    dataset_config = dataset_configs[dataset]
+    if download_dir is False:
+        download_dir = root
+    d_names, kwargs = dataset_config.gen_kwargs(download_dir)
 
     datasets_configured = []
     for i, name in enumerate(d_names):
@@ -107,23 +120,9 @@ def main(args):
 
     # add to stockroom
     for i, d in enumerate(datasets_configured):
-        add_from_dataset(d_names[i], d, args.root, ['img', 'label'])
+        add_from_dataset(d_names[i], d, root, ['img', 'label'])
 
-    print(f'The {args.dataset} Dataset has been added to StockRoom.\nEnjoy!')
+    print(f'The {dataset} Dataset has been added to StockRoom.\nEnjoy!')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('dataset',
-                        type=str,
-                        choices=list(dataset_configs.keys()),
-                        help='The name of PyTorch dataset you want to add to stockroom')
-
-    parser.add_argument('--root',
-                        type=str,
-                        help='Root directory in which the dataset is downloaded to',
-                        default='./')
-    parser.add_argument('--download-dir', '-d',
-                        default=False)
-
-    args = parser.parse_args()
-    main(args)
+    download()

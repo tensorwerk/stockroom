@@ -65,7 +65,7 @@ class DatasetConfig:
             kwargs.update(self.special_args)
 
         dataset_names = []
-        if self.__len__() > 0:
+        if len(self) > 0:
             kwargs_list = []
             if self.train_arg:
                 kwargs['train'] = True
@@ -78,6 +78,7 @@ class DatasetConfig:
                 for split in self.splits:
                     kwargs[self.split_arg_name] = split
                     kwargs_list.append(kwargs.copy())
+                    dataset_names.append(f'{self.name}_{split}')
             kwargs = kwargs_list
 
         return dataset_names, kwargs
