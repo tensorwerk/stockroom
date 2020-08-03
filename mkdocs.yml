@@ -42,4 +42,5 @@ nav:
 - Home: index.md
 - Languages:
   - en: /
+- Quick Start: quick-start.md
 - CLI Reference: cli.md

@@ -10,8 +10,6 @@ from hangar import Repository
 import numpy as np
 from tqdm import tqdm
 
-from dataset_configs import dataset_configs
-
 
 def hangar_transform(item):
     if isinstance(item, torch.Tensor):
@@ -91,38 +89,3 @@ def add_from_dataset(
                                   position=0, leave=True):
                 for column, item in zip(columns_added, sample):
                     stock.data[column][i] = hangar_transform(item)
-
-@click.command()
-@click.argument('dataset')
-@click.option('--root', '-r',
-               help='The root directory where the Repository should be created')
-@click.option('--download-dir', '-d', default=False,
-              help=('If you have the dataset downloaded or want to download it'
-                    'to a diffent path, pass it here'))
-def download(dataset, root, download_dir):
-    """
-    Downloads Pytorch datasets and creates and loads them into a StockRoom
-    repo for you. Currently the following datasets are supported.
-
-    1. torchvison - Mnist, Cifar10, Fashion-mnist.
-    """
-
-    # build the config for the Dataset
-    dataset_config = dataset_configs[dataset]
-    if download_dir is False:
-        download_dir = root
-    d_names, kwargs = dataset_config.gen_kwargs(download_dir)
-
-    datasets_configured = []
-    for i, name in enumerate(d_names):
-        d = datasets.__dict__[dataset_config.name](**kwargs[i])
-        datasets_configured.append(d)
-
-    # add to stockroom
-    for i, d in enumerate(datasets_configured):
-        add_from_dataset(d_names[i], d, root, ['img', 'label'])
-
-    print(f'The {dataset} Dataset has been added to StockRoom.\nEnjoy!')
-
-if __name__ == '__main__':
-    download()

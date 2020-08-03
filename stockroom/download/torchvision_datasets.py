@@ -1,24 +1,4 @@
-from torchvision import transforms
-
-# the various types of dataset found in torchvision
-VISION_DATA_TYPES = {
-    'classification': list(('MNIST FashionMNIST KMNIST EMNIST QMNIST' +
-                            'FakeData LSUM ImageFolder DatasetFolder' +
-                            'ImageNet CIFAR10 CIFAR100 STL10 SVHN' +
-                            'USPS').split(' ')),
-    'captioning': list('CocoCaptions Flickr8k Flickr30k'.split(' ')),
-    #'detection': list('')
-    'segmentation': list('VOCSegmentation SBDataset'.split(' ')),
-    'action_reco': list('UCF101 HMDB51 Kinetics400'.split(' ')),
-}
-
-VISION_COLUMN_NAMES = {
-    'classification': ('image', 'label'),
-    'captioning': ('image', 'caption'),
-    #'detection': None,
-    'segmentation': ('image', 'segmentedImage'),
-    'action_reco': ('video', 'audio', 'label')
-}
+from torchvision import transforms, datasets
 
 
 class DatasetConfig:
@@ -84,7 +64,8 @@ class DatasetConfig:
         return dataset_names, kwargs
 
 # TorchVision Datasets
-# TODO add VOC, COCO
+# TODO add COCO
+# TODO test VOC and ImageFolder
 mnist = DatasetConfig('MNIST', train_arg=True)
 cifar10 = DatasetConfig('CIFAR10', train_arg=True)
 fashion_mnist = DatasetConfig('FashionMNIST', train_arg=True)
@@ -136,3 +117,17 @@ dataset_configs = {
         'VOCSegmentation': voc_seg,
         'VOCDetection': voc_det,
         }
+
+def gen_datasets(dataset_name, download_dir):
+    # build the config for the Dataset
+    dataset_config = dataset_configs[dataset_name]
+
+    d_names, kwargs = dataset_config.gen_kwargs(download_dir)
+
+    datasets_configured = []
+    for i, name in enumerate(d_names):
+        d = datasets.__dict__[dataset_config.name](**kwargs[i])
+        datasets_configured.append(d)
+
+    return d_names, datasets_configured
+
