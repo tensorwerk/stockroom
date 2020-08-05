@@ -34,14 +34,19 @@ your data access through the smart API so that we don't need to move the huge da
 around when you traverse between commits.   
 
 
+## Installation
+
+```console
+$ pip install stockroom
+```
+
 
 ## Example
 ```python
 from stockroom import StockRoom
 
-stock = StockRoom()
-weights = stock.model['resnet50']
-model.load_state_dict(weights)
+stock = StockRoom(write=True)
+model.load_state_dict(stock.model['resnet50'])
 for e in range(epochs):
     for i in range(limit):
         optimizer.zero_grad()
@@ -56,11 +61,6 @@ for e in range(epochs):
             stock.commit('adding a better model')
 ```
 
-## Installation
-
-```console
-$ pip install stockroom
-```
 
 ## Contributing
 We'd love to have you in the contributors list. Do check out the [contributors guide]() before submitting a PR.

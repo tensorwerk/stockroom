@@ -6,24 +6,26 @@ from stockroom import __version__
 
 @click.group(no_args_is_help=True, add_help_option=True, invoke_without_command=True)
 @click.version_option(version=__version__, help='display current stockroom version')
-def main():
+def stock():
     """
-    With ``stock`` we introduces a minimal set of commands which are necessary to run a
-    git + stockroom workflow. You will also be able to setup github hooks for few
-    ``stock`` actions in the upcoming release.
+    The `stock` CLI provides a git-like experience (whenever possible) to interact with
+    the stock repository. It also means that the *current working directory* is where
+    the stock repository would exist (like git 😊 ).
     """
     pass
 
 
-@main.command()
+@stock.command()
 @click.option('--name', prompt='User Name', help='First and last name of user')
 @click.option('--email', prompt='User Email', help='Email address of the user')
 @click.option('--overwrite', is_flag=True, default=False,
               help='overwrite a repository if it exists at the current path')
 def init(name, email, overwrite):
     """
-    Init stockroom repository. A stockroom repository is a hangar repository plus
-    a `head.stock` that will be tracked by git.
+    Init stockroom repository. This will create a .hangar directory and a `head.stock`
+    file in your `cwd`. `stock init` would be triggered implicitly if you are making
+    a stock repository by using `stock import` but in all other case, you'd need to
+    initialize a stock repository to start operating on it with the python APIs
     """
     try:
         init_repo(name, email, overwrite)
@@ -31,27 +33,26 @@ def init(name, email, overwrite):
         raise click.ClickException(e)  # type: ignore
 
 
-@main.command()
+@stock.command()
 @click.option('--message', '-m', multiple=True,
               help=('The commit message. If multiple arguments are provided, '
                     'each of them gets converted into a new line'))
 def commit(message):
     """
-    It does a stock commit. Stock commit consists of three actions
+    It does a stock commit. Stock commit consists of two actions
 
-    1. Make a hangar commit and add the changed data to the repository
-    2. Update the `head.stock` file which should be tracked with a git commit
-    3. [Optional] Make a git commit and add the head.stock file to git history
+    1. Make a hangar commit
+    2. Update the `head.stock` file (git will track this file if you are using git)
     """
     if len(message) < 1:
         raise click.ClickException(ValueError("Require commit message"))
-    # TODO: There should be a way to share the write enabled checkout if user wanna commit
-    #   let's say when he has a writer checkout open in jupyter notebook
-    stock = StockRoom(write=True)
+    # TODO: There should be a way to share the write enabled checkout if user need to
+    #  commit let's say when he has a writer checkout open in jupyter notebook
+    stock_obj = StockRoom(write=True)
     msg = '\n'.join(message)
     click.echo('Commit message:\n' + msg)
     try:
-        digest = stock.commit(message)
+        digest = stock_obj.commit(message)
     except (FileNotFoundError, RuntimeError) as e:
         raise click.ClickException(e)  # type: ignore
     click.echo(f'Commit Successful. Digest: {digest}')
