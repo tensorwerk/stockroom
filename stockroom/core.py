@@ -46,8 +46,8 @@ class StockRoom:
     path to the repository explicitly. The rationale here is, if you provide the path, we
     trust you that you know what you doing on that path
     """
-    def __init__(self, path: Union[str, Path] = None, write: bool = False, shared: bool = False):
-        # TODO: Implement shared access
+    def __init__(self, path: Union[str, Path] = None, write: bool = False):
+        # TODO: context manager on Object creation
         # TODO: make force_release_writer_lock easier with stockroom?
         self.path = Path(path) if path else get_stock_root(Path.cwd())
         self._repo = Repository(self.path)
@@ -75,7 +75,7 @@ class StockRoom:
         with ExitStack() as stack:
             stack.enter_context(self.accessor)
             yield
-        if autocommit:
+        if autocommit and self.accessor.diff.status() != 'CLEAN':
             self.accessor.commit(commit_msg)
 
     def update_head(self):
@@ -89,13 +89,6 @@ class StockRoom:
         self.accessor = self._repo.checkout(commit=self.head).__enter__()
 
     def close(self):
-        self.accessor.close()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # TODO: do it with refcounting if shared is possible
         self.accessor.close()
 
     @property

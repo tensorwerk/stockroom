@@ -25,9 +25,9 @@ plugins:
 - markdownextradata:
     data: data
 markdown_extensions:
-- markdown.extensions.codehilite:
-    guess_lang: false
-- codehilite:
+  - mkdocs-click
+  - codehilite
+
 extra:
   social:
     - icon: fontawesome/brands/github-alt
@@ -42,3 +42,4 @@ nav:
 - Home: index.md
 - Languages:
   - en: /
+- CLI Reference: cli.md
