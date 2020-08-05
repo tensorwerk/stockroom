@@ -1,17 +1,23 @@
-import click
+'''
+Pytorch Dataloader into StockRoom
+'''
 from pathlib import Path
 from typing import Union
 
-import torch
-from torch.utils.data import Dataset
-from torchvision import datasets, transforms
-from stockroom import StockRoom, init_repo
 from hangar import Repository
 import numpy as np
 from tqdm import tqdm
+import torch
+from torch.utils.data import Dataset
+
+from stockroom import StockRoom
 
 
 def hangar_transform(item):
+    '''
+    Converts a set of datatypes to numpy arrays that can be
+    added to hangar
+    '''
     if isinstance(item, torch.Tensor):
         return item.detach().numpy()
     if isinstance(item, int):
@@ -22,14 +28,18 @@ def hangar_transform(item):
             subsample[idx] = i
         return subsample
 
+    return item
 
-def add_from_dataset(
+
+def add_from_dataset(           # pylint: disable='too-many-locals'
         name: str,
         dataset: Dataset,
         root_dir: Union[Path, str],
         column_postfixes: list = None
         ) -> str:
-
+    '''
+    Takes a dataset and adds it to StockRoom
+    '''
     repo = Repository(root_dir)
     if not repo.initialized:
         print(f'The stock repo is not initialized in {root_dir}. Initializing...')
@@ -37,8 +47,8 @@ def add_from_dataset(
         uemail = input('Email: ')
         repo.init(user_name=uname, user_email=uemail)
         commit_hash = ''
-        with open(Path(root_dir)/'head.stock', 'w+') as f:
-            f.write(commit_hash)
+        with open(Path(root_dir)/'head.stock', 'w+') as commit_file:
+            commit_file.write(commit_hash)
         print('StockRoom repo created')
 
     master = repo.checkout(write=True)
@@ -83,9 +93,10 @@ def add_from_dataset(
     # open stockroom
     stock = StockRoom(root_dir, write=True)
 
-    with stock:
-        with stock.run():
-            for i, sample in tqdm(enumerate(dataset), total=len(dataset),
-                                  position=0, leave=True):
-                for column, item in zip(columns_added, sample):
-                    stock.data[column][i] = hangar_transform(item)
+    with stock.run():
+        for i, sample in tqdm(enumerate(dataset), total=len(dataset),
+                              position=0, leave=True):
+            for column, item in zip(columns_added, sample):
+                stock.data[column][i] = hangar_transform(item)
+
+    stock.close()

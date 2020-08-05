@@ -58,14 +58,15 @@ def commit(message):
         raise click.ClickException(e)  # type: ignore
     click.echo(f'Commit Successful. Digest: {digest}')
 
-@main.command()
+
+@main.command(name='import')
 @click.argument('dataset')
 @click.option('--root', '-r', default='./', type=click.Path(),
-               help='The root directory where the Repository should be created')
+              help='The root directory where the Repository should be created')
 @click.option('--download-dir', '-d', default='./', type=click.Path(),
               help=('If you have the dataset downloaded or want to download it'
                     'to a diffent path, pass it here'))
-def download(dataset, root, download_dir):
+def import_data(dataset, root, download_dir):
     """
     Downloads and commits a Pytorch datasets.
     It creates the repo and loads the dataset into a StockRoom

@@ -1,8 +1,14 @@
+from typing import Union
+from pathlib import Path
+
 from torchvision import transforms, datasets
 
 
 class DatasetConfig:
-    def __init__(self,
+    '''
+    Dataset config object to generate the kwargs for a given dataset.
+    '''
+    def __init__(self,                      # pylint: disable='too-many-arguments'
                  name,
                  transform=transforms.ToTensor(),
                  target_transform=None,
@@ -11,7 +17,6 @@ class DatasetConfig:
                  split_arg_name='split',
                  downloadable=True,
                  special_args=None):
-
         self.name = name
         self.downloadable = downloadable
         self.transform = transform
@@ -29,10 +34,12 @@ class DatasetConfig:
     def __len__(self):
         if self.splits is not None:
             return len(self.splits)
-        else:
-            return 0
+        return 0
 
-    def gen_kwargs(self, root_dir):
+    def gen_kwargs(self, root_dir: Union[str, Path]):
+        '''
+        Generate the kwargs for the DatasetConfig.
+        '''
         kwargs = {}
         kwargs['root'] = root_dir
         if self.downloadable:
@@ -63,6 +70,7 @@ class DatasetConfig:
 
         return dataset_names, kwargs
 
+
 # TorchVision Datasets
 # TODO add COCO
 # TODO test VOC and ImageFolder
@@ -71,8 +79,8 @@ cifar10 = DatasetConfig('CIFAR10', train_arg=True)
 fashion_mnist = DatasetConfig('FashionMNIST', train_arg=True)
 
 resize = transforms.Compose([
-                    transforms.Resize([224, 224]),
-                    transforms.ToTensor(),])
+        transforms.Resize([224, 224]),
+        transforms.ToTensor()])
 image_folder = DatasetConfig('ImageFolder',
                              transform=resize,
                              splits=None,
@@ -83,7 +91,10 @@ voc_seg = DatasetConfig('VOCSegmentation',
                         split_arg_name='image_set',
                         splits=['train', 'val', 'trainval'])
 
+
 def voc_target_transform(target):
+    'Custom transform for VOC Object-detection target dictionary'
+
     col_dict = {}
     target = target['annotation']
     size = target['size']
@@ -103,6 +114,7 @@ def voc_target_transform(target):
     col_dict['boxes'] = bndbox_cords
     return col_dict
 
+
 voc_det = DatasetConfig('VOCDetection',
                         transform=resize,
                         target_transform=voc_target_transform,
@@ -118,7 +130,11 @@ dataset_configs = {
         'VOCDetection': voc_det,
         }
 
-def gen_datasets(dataset_name, download_dir):
+
+def gen_datasets(dataset_name: str, download_dir: Union[str, Path]):
+    '''
+    Generate a list of configured datasets.
+    '''
     # build the config for the Dataset
     dataset_config = dataset_configs[dataset_name]
 
