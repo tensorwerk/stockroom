@@ -1,13 +1,13 @@
 from pathlib import Path
+import warnings
 from hangar import Repository
 
 
 def init_repo(name=None, email=None, overwrite=False):
     """ init hangar repo, create stock file and add details to .gitignore """
     if not Path.cwd().joinpath('.git').exists():
-        raise RuntimeError("stock init should execute only in a"
-                           " git repository. Try running stock "
-                           "init after git init")
+        warnings.warn("initializing stock repository in a directory which is not a "
+                      "git repository. Some features won't work", UserWarning)
     repo = Repository(Path.cwd(), exists=False)
     if not overwrite and repo.initialized:
         commit_hash = repo.log(return_contents=True)['head']
@@ -22,14 +22,15 @@ def init_repo(name=None, email=None, overwrite=False):
     repo._env._close_environments()
 
     stock_file = Path.cwd()/'head.stock'
-    if not stock_file.exists():
-        # str() because of typing
+    if stock_file.exists():
+        warnings.warn("Trying to initialize an already initialized stock repository. "
+                      "No action taken", UserWarning)
+    else:
         with open(str(stock_file), 'w+') as f:
             f.write(commit_hash)
         print("Stock file created")
 
     gitignore = Path.cwd()/'.gitignore'
-    # str() because of typing
     with open(str(gitignore), 'a+') as f:
         f.seek(0)
         if '.hangar' not in f.read():
