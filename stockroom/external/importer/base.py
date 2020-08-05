@@ -1,11 +1,7 @@
 import abc
 
 
-def get_importers(source):
-    pass
-
-
-class BaseImporter(abc.ABCMeta):
+class BaseImporter(abc.ABC):
 
     @abc.abstractmethod
     def column_names(self):

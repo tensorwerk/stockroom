@@ -1,5 +1,6 @@
 from pathlib import Path
 import click
+from contextlib import ExitStack
 from hangar import Repository
 from stockroom.keeper import init_repo
 from stockroom.core import StockRoom
@@ -59,3 +60,42 @@ def commit(message):
     except (FileNotFoundError, RuntimeError) as e:
         raise click.ClickException(e)  # type: ignore
     click.echo(f'Commit Successful. Digest: {digest}')
+
+
+@stock.command(name='import')
+@click.argument('dataset_name')
+@click.option('--download-dir', '-d', default=Path.home(), type=click.Path(),
+              help=('If you have the dataset downloaded in a non-default path or want '
+                    'to download it to a non-default path, pass it here'))
+def import_data(dataset_name, download_dir):
+    """
+    Downloads and add a pytorch dataset (from torchvision, torchtext or torchaudio)
+    to StockRoom. It creates the repo if it doesn't exist and loads the dataset
+    into a repo for you
+    """
+    repo = Repository(Path.home(), exists=False)
+    if not repo.initialized:
+        raise RuntimeError("Repository is not initialized. Check `stock init --help` "
+                           "details about how to initialize a repository")
+    # TODO: use the auto-column-creation logic in stockroom later
+    co = repo.checkout(write=True)
+    importers = external.get_importers(dataset_name, download_dir)
+    for importer in importers:
+        column_names = importer.column_names()
+        dtypes = importer.dtypes()
+        shapes = importer.shapes()
+        for colname, dtype, shape in zip(column_names, dtypes, shapes):
+            if colname not in co.keys():
+                # TODO: this assuming importer always return a numpy flat array
+                co.add_ndarray_column(colname, dtype=dtype, shape=shape)
+        columns = [co[name] for name in column_names]
+        with ExitStack() as stack:
+            for col in columns:
+                stack.enter_context(col)
+            for i, data in enumerate(importer):
+                for col, dt in zip(columns, data):
+                    # TODO: use the keys from importer
+                    col[i] = dt
+    co.commit(f'Data from {dataset_name} added through stock import')
+    co.close()
+    click.echo(f'The {dataset_name} dataset has been added to StockRoom')
