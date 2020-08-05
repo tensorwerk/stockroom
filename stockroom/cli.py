@@ -1,8 +1,10 @@
+from pathlib import Path
 import click
+from hangar import Repository
 from stockroom.keeper import init_repo
 from stockroom.core import StockRoom
 from stockroom import __version__
-from stockroom.download import add_from_dataset, gen_datasets
+from stockroom import external
 
 
 @click.group(no_args_is_help=True, add_help_option=True, invoke_without_command=True)
@@ -57,28 +59,3 @@ def commit(message):
     except (FileNotFoundError, RuntimeError) as e:
         raise click.ClickException(e)  # type: ignore
     click.echo(f'Commit Successful. Digest: {digest}')
-
-
-@main.command(name='import')
-@click.argument('dataset')
-@click.option('--root', '-r', default='./', type=click.Path(),
-              help='The root directory where the Repository should be created')
-@click.option('--download-dir', '-d', default='./', type=click.Path(),
-              help=('If you have the dataset downloaded or want to download it'
-                    'to a diffent path, pass it here'))
-def import_data(dataset, root, download_dir):
-    """
-    Downloads and commits a Pytorch datasets.
-    It creates the repo and loads the dataset into a StockRoom
-    repo for you. Currently the following datasets are supported.
-
-    1. torchvison - Mnist, Cifar10, Fashion-mnist.
-    """
-
-    d_names, d_configured = gen_datasets(dataset, download_dir)
-
-    # add to stockroom
-    for i, d in enumerate(d_configured):
-        add_from_dataset(d_names[i], d, root, ['img', 'label'])
-
-    print(f'The {dataset} Dataset has been added to StockRoom.\nEnjoy!')

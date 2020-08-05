@@ -5,10 +5,10 @@ from torchvision import transforms, datasets
 
 
 class DatasetConfig:
-    '''
+    """
     Dataset config object to generate the kwargs for a given dataset.
-    '''
-    def __init__(self,                      # pylint: disable='too-many-arguments'
+    """
+    def __init__(self,
                  name,
                  transform=transforms.ToTensor(),
                  target_transform=None,
