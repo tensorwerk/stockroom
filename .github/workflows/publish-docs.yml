@@ -36,6 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install -r docs/requirements.txt
+          pip install scikit-build
           python3 setup.py install
 
       - run: mkdocs build
