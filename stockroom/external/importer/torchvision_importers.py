@@ -9,9 +9,7 @@ class TorchvisionCommon(BaseImporter):
     def __init__(self, dataset, train):
         self.dataset = dataset
         self.split = 'train' if train else 'test'
-        self.sample_img, self.sample_label = self.dataset[0]
-        self.sample_img = np.array(self.sample_img)
-        self.sample_label = np.array([self.sample_label])
+        self.sample_img, self.sample_label = self._process_data(*self.dataset[0])
 
     def column_names(self):
         return f'{self.name}-{self.split}-image', f'{self.name}-{self.split}-label'
@@ -22,11 +20,17 @@ class TorchvisionCommon(BaseImporter):
     def dtypes(self):
         return self.sample_img.dtype, self.sample_label.dtype
 
+    @staticmethod
+    def _process_data(img, lbl):
+        # TODO: memory copy
+        img = np.ascontiguousarray(np.transpose(np.array(img), (2, 0, 1)))
+        img = img.astype(np.float32) / 255
+        lbl = np.array(lbl)
+        return img, lbl
+
     def __iter__(self):
         for img, label in self.dataset:
-            img = np.array(img)
-            label = np.array([label])
-            yield img, label
+            yield self._process_data(img, label)
 
     def variability_status(self):
         return False

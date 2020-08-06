@@ -27,6 +27,9 @@ plugins:
 markdown_extensions:
   - mkdocs-click
   - codehilite
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 
 extra:
   social:
