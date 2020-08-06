@@ -11,4 +11,4 @@ else:
     __all__.append('make_torch_dataset')
 
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
