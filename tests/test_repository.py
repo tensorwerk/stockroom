@@ -34,10 +34,6 @@ class TestInit:
         assert cwd.joinpath('.hangar').exists()
         assert cwd.joinpath('head.stock').exists()
 
-    def test_init_on_non_git_folder(self, repo_path):
-        with pytest.raises(RuntimeError):
-            init_repo('s', 'a@b.c', overwrite=True)
-
     def test_stock_init_on_existing_hangar_repo(self, cwd):
         repo = hangar.Repository(cwd, exists=False)
         repo.init('a', 'a@b.c')

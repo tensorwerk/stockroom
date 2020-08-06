@@ -10,9 +10,9 @@ from stockroom import StockRoom
 def test_version():
     import stockroom
     runner = CliRunner()
-    res = runner.invoke(cli.main, ['--version'])
+    res = runner.invoke(cli.stock, ['--version'])
     assert res.exit_code == 0
-    assert res.stdout == f'main, version {stockroom.__version__}\n'
+    assert res.stdout == f'stock, version {stockroom.__version__}\n'
 
 
 def test_init_repo():
@@ -20,12 +20,7 @@ def test_init_repo():
     with runner.isolated_filesystem():
         with pytest.raises(RuntimeError):
             StockRoom()
-        res = runner.invoke(cli.init, ['--name', 'test', '--email', 'test@foo.com'])
-        assert 'Error: stock init should execute only in a git repository' in res.output
-
-        cwd = Path.cwd()
-        cwd.joinpath('.git').mkdir(exist_ok=True)
-        res = runner.invoke(cli.init, ['--name', 'test', '--email', 'test@foo.com'])
+        res = runner.invoke(cli.init, ['--username', 'test', '--email', 'test@foo.com'])
         assert res.exit_code == 0
         StockRoom()
 
