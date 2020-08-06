@@ -34,10 +34,12 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
+        # TODO Fix this run
         run: |
           python3 -m pip install -r docs/requirements.txt
           pip install scikit-build
           python3 setup.py install
+          pip install git+https://github.com/hhsecond/hangar-py.git@dataset
 
       - run: mkdocs build
 
