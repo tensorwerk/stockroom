@@ -5,10 +5,7 @@ from setuptools import setup, find_packages
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
-requirements = ['Click>=7.0', 'hangar>=0.5.0']
+requirements = ['Click>=7.0', 'click_didyoumean', 'hangar>=0.5.0']
 
 setup(
     author="Sherin Thomas",
@@ -35,10 +32,10 @@ setup(
     project_urls={
         'Documentation': 'https://stockroom.readthedocs.io',
         'Issue Tracker': 'https://github.com/tensorwerk/stockroom/issues'},
-    entry_points={'console_scripts': ['stock=stockroom.cli:main']},
+    entry_points={'console_scripts': ['stock=stockroom.cli:stock']},
     install_requires=requirements,
     license="Apache Software License 2.0",
-    long_description=readme + '\n\n' + history,
+    long_description=readme + '\n\n',
     include_package_data=True,
     keywords='stockroom',
     name='stockroom',
