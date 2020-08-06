@@ -20,7 +20,7 @@ def test_init_repo():
     with runner.isolated_filesystem():
         with pytest.raises(RuntimeError):
             StockRoom()
-        res = runner.invoke(cli.init, ['--name', 'test', '--email', 'test@foo.com'])
+        res = runner.invoke(cli.init, ['--username', 'test', '--email', 'test@foo.com'])
         assert res.exit_code == 0
         StockRoom()
 

@@ -1,14 +1,18 @@
 from pathlib import Path
-import click
 from contextlib import ExitStack
+
+import click
+from click_didyoumean import DYMGroup
 from hangar import Repository
+
 from stockroom.keeper import init_repo
 from stockroom.core import StockRoom
 from stockroom import __version__
 from stockroom import external
 
 
-@click.group(no_args_is_help=True, add_help_option=True, invoke_without_command=True)
+@click.group(no_args_is_help=True, add_help_option=True,
+             invoke_without_command=True, cls=DYMGroup)
 @click.version_option(version=__version__, help='display current stockroom version')
 def stock():
     """
@@ -20,11 +24,11 @@ def stock():
 
 
 @stock.command()
-@click.option('--name', prompt='User Name', help='First and last name of user')
+@click.option('--username', prompt='Username', help='Username of the user')
 @click.option('--email', prompt='User Email', help='Email address of the user')
 @click.option('--overwrite', is_flag=True, default=False,
               help='overwrite a repository if it exists at the current path')
-def init(name, email, overwrite):
+def init(username, email, overwrite):
     """
     Init stockroom repository. This will create a .hangar directory and a `head.stock`
     file in your `cwd`. `stock init` would be triggered implicitly if you are making
@@ -32,7 +36,7 @@ def init(name, email, overwrite):
     initialize a stock repository to start operating on it with the python APIs
     """
     try:
-        init_repo(name, email, overwrite)
+        init_repo(username, email, overwrite)
     except RuntimeError as e:
         raise click.ClickException(e)  # type: ignore
 
@@ -73,12 +77,17 @@ def import_data(dataset_name, download_dir):
     to StockRoom. It creates the repo if it doesn't exist and loads the dataset
     into a repo for you
     """
-    repo = Repository('.', exists=False)
-    if not repo.initialized:
-        raise RuntimeError("Repository is not initialized. Check `stock init --help` "
-                           "details about how to initialize a repository")
+    try:
+        stock_obj = StockRoom(write=True)
+    except RuntimeError:
+        repo = Repository('.', exists=False)
+        if not repo.initialized:
+            raise RuntimeError("Repository is not initialized. Check `stock init --help` "
+                               "details about how to initialize a repository")
+        else:
+            raise
     # TODO: use the auto-column-creation logic in stockroom later
-    co = repo.checkout(write=True)
+    co = stock_obj.accessor
     importers = external.get_importers(dataset_name, download_dir)
     total_len = sum([len(importer) for importer in importers])
     with click.progressbar(label='Adding data to StockRoom', length=total_len) as bar:
@@ -99,6 +108,6 @@ def import_data(dataset_name, download_dir):
                     for col, dt in zip(columns, data):
                         # TODO: use the keys from importer
                         col[i] = dt
-    co.commit(f'Data from {dataset_name} added through stock import')
-    co.close()
+    stock_obj.commit(f'Data from {dataset_name} added through stock import')
+    stock_obj.close()
     click.echo(f'The {dataset_name} dataset has been added to StockRoom')
