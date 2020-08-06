@@ -2,6 +2,7 @@ import abc
 
 
 class BaseImporter(abc.ABC):
+    name = None
 
     @abc.abstractmethod
     def column_names(self):
@@ -12,7 +13,7 @@ class BaseImporter(abc.ABC):
         """
 
     @abc.abstractmethod
-    def shape(self):
+    def shapes(self):
         """
         Return the shape of the data sample(s). Return a tuple of shapes if one data
         sample has more than one data entity. For instance, if the data sample is
@@ -22,7 +23,7 @@ class BaseImporter(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def dtype(self):
+    def dtypes(self):
         """
         Return the datatype of the data sample. The data must be homogenous across
         dataset. If one data sample has more than one data entity, return a tuple
@@ -32,7 +33,7 @@ class BaseImporter(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def is_variable(self):
+    def variability_status(self):
         """
         Return True/False depending on the shape of the data sample across the
         dataset is variable or not. If the data sample contains more than one data
@@ -53,5 +54,12 @@ class BaseImporter(abc.ABC):
         Note that the keys for each data sample would be integers incrementing by one
         from zero to len(dataset). In the current implementation, setting custom keys
         is not allowed but might enable in the future releases
+        """
+        pass
+
+    @abc.abstractmethod
+    def __len__(self):
+        """
+        Return the length of the dataset. Simlar to `len(pytorch_dataset)`
         """
         pass

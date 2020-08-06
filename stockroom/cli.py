@@ -73,29 +73,32 @@ def import_data(dataset_name, download_dir):
     to StockRoom. It creates the repo if it doesn't exist and loads the dataset
     into a repo for you
     """
-    repo = Repository(Path.home(), exists=False)
+    repo = Repository('.', exists=False)
     if not repo.initialized:
         raise RuntimeError("Repository is not initialized. Check `stock init --help` "
                            "details about how to initialize a repository")
     # TODO: use the auto-column-creation logic in stockroom later
     co = repo.checkout(write=True)
     importers = external.get_importers(dataset_name, download_dir)
-    for importer in importers:
-        column_names = importer.column_names()
-        dtypes = importer.dtypes()
-        shapes = importer.shapes()
-        for colname, dtype, shape in zip(column_names, dtypes, shapes):
-            if colname not in co.keys():
-                # TODO: this assuming importer always return a numpy flat array
-                co.add_ndarray_column(colname, dtype=dtype, shape=shape)
-        columns = [co[name] for name in column_names]
-        with ExitStack() as stack:
-            for col in columns:
-                stack.enter_context(col)
-            for i, data in enumerate(importer):
-                for col, dt in zip(columns, data):
-                    # TODO: use the keys from importer
-                    col[i] = dt
+    total_len = sum([len(importer) for importer in importers])
+    with click.progressbar(label='Adding data to StockRoom', length=total_len) as bar:
+        for importer in importers:
+            column_names = importer.column_names()
+            dtypes = importer.dtypes()
+            shapes = importer.shapes()
+            for colname, dtype, shape in zip(column_names, dtypes, shapes):
+                if colname not in co.keys():
+                    # TODO: this assuming importer always return a numpy flat array
+                    co.add_ndarray_column(colname, dtype=dtype, shape=shape)
+            columns = [co[name] for name in column_names]
+            with ExitStack() as stack:
+                for col in columns:
+                    stack.enter_context(col)
+                for i, data in enumerate(importer):
+                    bar.update(1)
+                    for col, dt in zip(columns, data):
+                        # TODO: use the keys from importer
+                        col[i] = dt
     co.commit(f'Data from {dataset_name} added through stock import')
     co.close()
     click.echo(f'The {dataset_name} dataset has been added to StockRoom')
