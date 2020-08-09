@@ -41,26 +41,52 @@ class TorchvisionCommon(BaseImporter):
     def __len__(self):
         return len(self.dataset)
 
+    @classmethod
+    def gen_splits(cls, dataset, root):
+        dataset_splits = []
+        dataset_splits.append(dataset(root=root, train=True, download=True))
+        dataset_splits.append(dataset(root=root, train=False, download=True))
+        return dataset_splits
+
 
 class Cifar10(TorchvisionCommon):
     name = 'cifar10'
 
-    def __init__(self, root, train=True):
-        dataset = datasets.CIFAR10(root=root, train=train, download=True)
-        super().__init__(dataset, train)
+    @classmethod
+    def gen_splits(cls, root):
+        dataset = datasets.CIFAR10
+        dataset_splits = super().gen_splits(dataset, root)
+        return dataset_splits
 
 
 class Mnist(TorchvisionCommon):
     name = 'mnist'
 
-    def __init__(self, root, train=True):
-        dataset = datasets.MNIST(root=root, train=train, download=True)
-        super().__init__(dataset, train)
+    @classmethod
+    def gen_splits(cls, root):
+        dataset = datasets.MNIST
+        dataset_splits = super().gen_splits(dataset, root)
+        return dataset_splits
 
 
 class FashionMnist(TorchvisionCommon):
     name = 'fashion_mnist'
 
-    def __init__(self, root, train=True):
-        dataset = datasets.FashionMNIST(root=root, train=train, download=True)
-        super().__init__(dataset, train)
+    @classmethod
+    def gen_splits(cls, root):
+        dataset = datasets.FashionMNIST
+        dataset_splits = super().gen_splits(dataset, root)
+        return dataset_splits
+
+
+class ImageFolder(BaseImporter):
+    name = 'imagefolder'
+
+    def __init__(self, root):
+        self.dataset = datasets.ImageFolder(root)
+
+
+        self.sample_img, self.sample_label = self._hangar_transform(*self.dataset[0])
+
+    def column_names(self):
+        return

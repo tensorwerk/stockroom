@@ -44,6 +44,15 @@ class BaseImporter(abc.ABC):
         """
         pass
 
+    @classmethod
+    @abc.abstractmethod
+    def gen_splits(cls):
+        """
+        This is a factory method which creates a tuple of Dataset objects
+        corresponding to the different splits a dataset can have.
+        """
+        pass
+
     @abc.abstractmethod
     def __iter__(self):
         """
@@ -63,3 +72,4 @@ class BaseImporter(abc.ABC):
         Return the length of the dataset. Simlar to `len(pytorch_dataset)`
         """
         pass
+
