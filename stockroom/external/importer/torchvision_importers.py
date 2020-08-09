@@ -26,7 +26,7 @@ class TorchvisionCommon(BaseImporter):
     @staticmethod
     def _process_data(img, lbl):
         # TODO: memory copy
-        img = np.ascontiguousarray(np.transpose(np.array(img), (2, 0, 1)))
+        img = np.ascontiguousarray(np.array(img))
         img = img.astype(np.float32) / 255
         lbl = np.array(lbl)
         return img, lbl
@@ -42,10 +42,11 @@ class TorchvisionCommon(BaseImporter):
         return len(self.dataset)
 
     @classmethod
-    def gen_splits(cls, dataset, root):
+    def gen_splits(cls, torchvision_dataset, root):
         dataset_splits = []
-        dataset_splits.append(dataset(root=root, train=True, download=True))
-        dataset_splits.append(dataset(root=root, train=False, download=True))
+        for train in [True, False]:
+            dataset = torchvision_dataset(root=root, train=train, download=True)
+            dataset_splits.append(cls(dataset, train))
         return dataset_splits
 
 
@@ -57,6 +58,14 @@ class Cifar10(TorchvisionCommon):
         dataset = datasets.CIFAR10
         dataset_splits = super().gen_splits(dataset, root)
         return dataset_splits
+
+    @staticmethod
+    def _process_data(img, lbl):
+        img = np.transpose(np.array(img), (2, 0, 1))
+        img = np.ascontiguousarray(np.array(img))
+        img = img.astype(np.float32) / 255
+        lbl = np.array(lbl)
+        return img, lbl
 
 
 class Mnist(TorchvisionCommon):
