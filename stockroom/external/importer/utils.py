@@ -19,8 +19,7 @@ def get_importers(source: str, download_dir: Path):
         raise RuntimeError(f"Could not parse the source string '{source}'")
 
     try:
-        return (importers_dict[package][dataset](download_dir, train=True),
-                importers_dict[package][dataset](download_dir, train=False))
+        return importers_dict[package][dataset].gen_splits(download_dir)
     except KeyError:
         raise RuntimeError("Could not fetch the dataset you were looking for. "
                            "Create a request for new importers")
