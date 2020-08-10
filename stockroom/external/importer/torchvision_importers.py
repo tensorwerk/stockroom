@@ -1,3 +1,5 @@
+import os
+
 try:
     from torchvision import datasets
 except ModuleNotFoundError:
@@ -26,7 +28,7 @@ class TorchvisionCommon(BaseImporter):
     @staticmethod
     def _process_data(img, lbl):
         # TODO: memory copy
-        img = np.ascontiguousarray(np.array(img))
+        img = np.array(img)
         img = img.astype(np.float32) / 255
         lbl = np.array(lbl)
         return img, lbl
@@ -55,14 +57,12 @@ class Cifar10(TorchvisionCommon):
 
     @classmethod
     def gen_splits(cls, root):
-        dataset = datasets.CIFAR10
-        dataset_splits = super().gen_splits(dataset, root)
-        return dataset_splits
+        return super().gen_splits(datasets.CIFAR10, root)
 
     @staticmethod
     def _process_data(img, lbl):
         img = np.transpose(np.array(img), (2, 0, 1))
-        img = np.ascontiguousarray(np.array(img))
+        img = np.ascontiguousarray(img)
         img = img.astype(np.float32) / 255
         lbl = np.array(lbl)
         return img, lbl
@@ -73,9 +73,7 @@ class Mnist(TorchvisionCommon):
 
     @classmethod
     def gen_splits(cls, root):
-        dataset = datasets.MNIST
-        dataset_splits = super().gen_splits(dataset, root)
-        return dataset_splits
+        return super().gen_splits(datasets.MNIST, root)
 
 
 class FashionMnist(TorchvisionCommon):
@@ -83,19 +81,4 @@ class FashionMnist(TorchvisionCommon):
 
     @classmethod
     def gen_splits(cls, root):
-        dataset = datasets.FashionMNIST
-        dataset_splits = super().gen_splits(dataset, root)
-        return dataset_splits
-
-
-class ImageFolder(BaseImporter):
-    name = 'imagefolder'
-
-    def __init__(self, root):
-        self.dataset = datasets.ImageFolder(root)
-
-
-        self.sample_img, self.sample_label = self._hangar_transform(*self.dataset[0])
-
-    def column_names(self):
-        return
+        return super().gen_splits(datasets.FashionMNIST, root)
