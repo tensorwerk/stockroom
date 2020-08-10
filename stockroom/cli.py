@@ -137,9 +137,10 @@ def import_data(dataset_name, download_dir):
             column_names = importer.column_names()
             dtypes = importer.dtypes()
             shapes = importer.shapes()
-            splits_added[importer.split] = (column_names, len(importer))
+            is_variable = importer.variability_status()
 
             new_col_details = []
+            splits_added[importer.split] = (column_names, len(importer))
             for colname, dtype, shape in zip(column_names, dtypes, shapes):
                 if colname not in co.keys():
                     # TODO: this assuming importer always return a numpy flat array
