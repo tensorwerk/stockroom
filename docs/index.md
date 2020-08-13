@@ -9,7 +9,7 @@
 [![PyPi](https://img.shields.io/pypi/v/stockroom?style=for-the-badge)](https://pypi.python.org/pypi/stockroom)
 [![lgtm](https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge)](https://lgtm.com/projects/g/tensorwerk/stockroom/)
 
-A version control system for software 2.0.
+Version control for software 2.0
 
 
 # Introduction
@@ -65,7 +65,7 @@ for e in range(epochs):
 
 ## Contributing
 
-We'd love to have you in the contributors list. Do check out the [contributor's guide]() before submitting a PR.
+We'd love to have you in the contributors list. Do check out the [contribution guide]() before submitting a PR.
 Here is our latest #Hall-Of-Fame
 
 [![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/0)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/0)

@@ -6,8 +6,6 @@ extra_css:
   - stylesheets/termynal.css
 extra_javascript:
   - js/termynal.js
-  - js/chat.js
-  - https://sidecar.gitter.im/dist/sidecar.v1.js
   - js/custom.js
 theme:
   name: material
@@ -36,14 +34,21 @@ extra:
     - icon: fontawesome/brands/github-alt
       link: https://github.com/tensorwerk/stockroom
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/__stockroom__
+      link: https://twitter.com/tensorwerk
     - icon: fontawesome/brands/medium
       link: https://medium.com/@tensorwerk
     - icon: fontawesome/solid/globe
       link: https://tensorwerk.com
+    - icon: fontawesome/solid/envelope
+      link: mailto:sherin@tensorwerk.com
+    - icon: fontawesome/brands/slack
+      link: https://join.slack.com/t/hangarusergroup/shared_invite/zt-886tggtd-_rs1RIb5ACz5g~AzyhphPg
 nav:
 - Home: index.md
 - Languages:
   - en: /
 - Quick Start: quick-start.md
 - CLI Reference: cli.md
+- Help Us: help-us.md
+- Contribution Guide: contributing.md
+- Release Notes: changelog.md
