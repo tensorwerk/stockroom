@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Added
 
-* The `import` CLI for importing PyTorch datasets (torchvision, torchtext and torchaudio) [#17](https://github.com/tensorwerk/stockroom/pull/17) [@@jjmachan](https://github.com/jjmachan)
+* The `import` CLI for importing PyTorch datasets (torchvision, torchtext and torchaudio) [#17](https://github.com/tensorwerk/stockroom/pull/17) [@jjmachan](https://github.com/jjmachan)
 
 
 #### Changed
