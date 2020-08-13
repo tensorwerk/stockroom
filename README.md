@@ -30,7 +30,7 @@ versioned source code.
 - It is **easy**. The APIs are very similar to dictionaries in python
 - It **works alongside Git** - in case you need to version source code as well. It's OK if you don't.
 - **High performance**, thanks to the amazing [hangar](https://github.com/tensorwerk/hangar-py) library
-- **Integration with PyTorch** and it's ecosystem, so that you don't need to write the complex pipeline code.  
+- **Integration with PyTorch** and its ecosystem, so that you don't need to write the complex pipeline code.  
 
 # Why
 One important motivation behind the initial design of stockroom is to avoid users
