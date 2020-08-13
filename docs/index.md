@@ -5,7 +5,6 @@
 
 
 
-![Gitter](https://img.shields.io/gitter/room/tensorwerk/stockroom?color=%2332a877&style=for-the-badge)
 [![PyPi](https://img.shields.io/pypi/v/stockroom?style=for-the-badge)](https://pypi.python.org/pypi/stockroom)
 [![lgtm](https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge)](https://lgtm.com/projects/g/tensorwerk/stockroom/)
 
@@ -65,7 +64,7 @@ for e in range(epochs):
 
 ## Contributing
 
-We'd love to have you in the contributors list. Do check out the [contribution guide]() before submitting a PR.
+We'd love to have you in the contributors list. Do check out the [contribution guide](contributing.md) before submitting a PR.
 Here is our latest #Hall-Of-Fame
 
 [![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/0)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/0)
