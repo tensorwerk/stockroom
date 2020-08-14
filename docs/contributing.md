@@ -17,14 +17,14 @@ git checkout -b your-branch-name
 
 ## Contributing to the code
 
-Once done with the changes, run the test suite. It will run existing test cases, check coverage, run linter and mypy.
-Also, make sure you have updated the documentation, test suite and the `changelog.md` file in `docs` directory before
-creating the PR
+Once done with the changes, run the test suite. It will run existing test cases, check coverage, run `black` and `mypy`.
+Also, make sure you have updated the documentation, added required test cases and modified the `changelog.md` file
+in `docs` directory before creating the PR
 
 <div class="termy">
 
 ```console
-$ tox
+$ bash ./scripts/test.sh
 ---> 100%
 ```
 
