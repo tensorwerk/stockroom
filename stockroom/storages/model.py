@@ -1,12 +1,11 @@
 import warnings
 
 import numpy as np
-
 from stockroom import parser
 from stockroom.utils import LazyLoader
 
-torch = LazyLoader('torch', globals(), 'torch')
-tf = LazyLoader('tf', globals(), 'tensorflow')
+torch = LazyLoader("torch", globals(), "torch")
+tf = LazyLoader("tf", globals(), "tensorflow")
 
 
 class Model:
@@ -34,6 +33,7 @@ class Model:
     weights from the model or how to put weights back to model. Checkout :meth:`Model.save_weights`
     & :meth:`Model.load_weights` for more details
     """
+
     def __init__(self, accessor):
         self.accessor = accessor
 
@@ -41,10 +41,10 @@ class Model:
         if isinstance(weights, dict):
             layers = weights.keys()
             weights = [x.numpy() for x in weights.values()]
-            library = 'torch'
+            library = "torch"
             library_version = torch.__version__
         elif isinstance(weights, list):
-            library = 'tf'
+            library = "tf"
             layers = None
             library_version = tf.__version__
         else:
@@ -57,12 +57,12 @@ class Model:
             metacol = writer.add_str_column(metakey)
         else:
             metacol = writer[metakey]
-        metacol['library'] = library
-        metacol['libraryVersion'] = library_version
-        metacol['longest'] = str(longest)
-        metacol['dtypes'] = parser.stringify(dtypes)
-        metacol['numLayers'] = str(len(weights))
-        metacol['layers'] = parser.stringify(layers)
+        metacol["library"] = library
+        metacol["libraryVersion"] = library_version
+        metacol["longest"] = str(longest)
+        metacol["dtypes"] = parser.stringify(dtypes)
+        metacol["numLayers"] = str(len(weights))
+        metacol["layers"] = parser.stringify(layers)
 
         # ---------- Create ndarray columns if doesn't exist -----------------
         shapeKey = parser.model_shapekey(name, str(longest))
@@ -73,7 +73,8 @@ class Model:
             modelKey = parser.modelkey(name, str(longest), dtypes[i])
             if modelKey not in writer.columns.keys():
                 writer.add_ndarray_column(
-                    modelKey, longest, np.dtype(dtypes[i]), variable_shape=True)
+                    modelKey, longest, np.dtype(dtypes[i]), variable_shape=True
+                )
         # ---------------------------------------------------------
 
         shape_col = writer.columns[shapeKey]
@@ -95,12 +96,12 @@ class Model:
             metacol = reader.columns[metakey]
         except KeyError:
             raise KeyError(f"Model with key {name} not found")
-        library = metacol['library']
-        library_version = metacol['libraryVersion']
-        longest = int(metacol['longest'])
-        dtypes = parser.destringify(metacol['dtypes'])
-        num_layers = int(metacol['numLayers'])
-        layers = parser.destringify(metacol['layers'])
+        library = metacol["library"]
+        library_version = metacol["libraryVersion"]
+        longest = int(metacol["longest"])
+        dtypes = parser.destringify(metacol["dtypes"])
+        num_layers = int(metacol["numLayers"])
+        layers = parser.destringify(metacol["layers"])
 
         shapeKey = parser.model_shapekey(name, longest)
         shape_col = reader.columns[shapeKey]
@@ -110,16 +111,20 @@ class Model:
             col = reader.columns[modelKey]
             w = col[i].reshape(np.array(shape_col[i]))
             weights.append(w)
-        if library == 'torch':
+        if library == "torch":
             if torch.__version__ != library_version:
-                warnings.warn(f"PyTorch version used while storing the model "
-                              f"({library_version}) is not same as the one installed "
-                              f"in the current environment. i.e {torch.__version__}")
+                warnings.warn(
+                    f"PyTorch version used while storing the model "
+                    f"({library_version}) is not same as the one installed "
+                    f"in the current environment. i.e {torch.__version__}"
+                )
             return {layers[i]: torch.from_numpy(weights[i]) for i in range(num_layers)}
 
         else:
             if tf.__version__ != library_version:
-                warnings.warn(f"Tensorflow version used while storing the model "
-                              f"({library_version}) is not same as the one installed "
-                              f"in the current environment. i.e {tf.__version__}")
+                warnings.warn(
+                    f"Tensorflow version used while storing the model "
+                    f"({library_version}) is not same as the one installed "
+                    f"in the current environment. i.e {tf.__version__}"
+                )
             return weights

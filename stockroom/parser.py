@@ -1,5 +1,5 @@
-SEP = '--_'
-PREFIX = '_STK'
+SEP = "--_"
+PREFIX = "_STK"
 
 
 # ===================================================================
@@ -21,17 +21,19 @@ def model_shapekey(name, longest):
 #                      Metadata Value parsers
 # ===================================================================
 
+
 def stringify(lst):
-    return ','.join(lst) if lst else ''
+    return ",".join(lst) if lst else ""
 
 
 def destringify(string):
-    return string.split(',') if string else ''
+    return string.split(",") if string else ""
 
 
 # ===================================================================
 #                            Tag keys
 # ===================================================================
+
 
 def tagkey():
     return f"{PREFIX}{SEP}tag"
