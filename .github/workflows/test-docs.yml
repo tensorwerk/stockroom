@@ -1,0 +1,27 @@
+name: Test Docs
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install -r docs/requirements.txt
+          python3 -m pip install .
+      - name: Build Docs
+        run: bash ./scripts/build_docs.sh
