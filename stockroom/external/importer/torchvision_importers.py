@@ -1,11 +1,12 @@
 import os
 
+import numpy as np
+from stockroom.external.importer.base import BaseImporter
+
 try:
     from torchvision import datasets  # type: ignore
 except ModuleNotFoundError:
     pass
-import numpy as np
-from stockroom.external.importer.base import BaseImporter
 
 
 class TorchvisionCommon(BaseImporter):

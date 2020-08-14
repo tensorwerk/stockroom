@@ -2,11 +2,14 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import click
-from click_didyoumean import DYMGroup  # type: ignore
 from hangar import Repository
+from rich.progress import Progress
 from stockroom import __version__, external
 from stockroom.core import StockRoom
 from stockroom.keeper import init_repo
+from stockroom.utils import console, new_columns_table
+
+from click_didyoumean import DYMGroup  # type: ignore
 
 
 @click.group(
@@ -111,24 +114,32 @@ def import_data(dataset_name, download_dir):
     co = stock_obj.accessor
     importers = external.get_importers(dataset_name, download_dir)
     total_len = sum([len(importer) for importer in importers])
-    with click.progressbar(label="Adding data to StockRoom", length=total_len) as bar:
+    splits_added = {}
+
+    with Progress() as progress:
+        stock_add_bar = progress.add_task("Adding to Stockroom: ", total=total_len)
         for importer in importers:
             column_names = importer.column_names()
             dtypes = importer.dtypes()
             shapes = importer.shapes()
+            splits_added[importer.split] = (column_names, len(importer))
+
             for colname, dtype, shape in zip(column_names, dtypes, shapes):
                 if colname not in co.keys():
                     # TODO: this assuming importer always return a numpy flat array
                     co.add_ndarray_column(colname, dtype=dtype, shape=shape)
+
             columns = [co[name] for name in column_names]
             with ExitStack() as stack:
                 for col in columns:
                     stack.enter_context(col)
                 for i, data in enumerate(importer):
-                    bar.update(1)
+                    progress.advance(stock_add_bar)
                     for col, dt in zip(columns, data):
                         # TODO: use the keys from importer
                         col[i] = dt
+
     stock_obj.commit(f"Data from {dataset_name} added through stock import")
     stock_obj.close()
-    click.echo(f"The {dataset_name} dataset has been added to StockRoom")
+    click.echo(f"The {dataset_name} dataset has been added to StockRoom.")
+    console.print(new_columns_table(splits_added))

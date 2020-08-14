@@ -2,6 +2,39 @@ import importlib
 import types
 from pathlib import Path
 
+from rich import box
+from rich.console import Console
+from rich.table import Table
+
+# init console object to be used throught.
+console = Console()
+
+
+def new_columns_table(splits_added: dict) -> Table:
+    """
+    Builds a Rich Table with the infor about the new columns created.
+
+    Parameters
+    ----------
+    splits_added : dict containing the column_names and length of each split
+
+    Returns
+    -------
+    Table
+        The final generated table ready to be displayed
+
+    """
+    table = Table(box=box.MINIMAL)
+
+    table.add_column("Split [len]", no_wrap=True, justify="right", style="bold green")
+    table.add_column("Column Names")
+
+    for split in splits_added:
+        column_names, num_samples = splits_added[split]
+        table.add_row(split + f" [{num_samples}]", ", ".join(column_names))
+
+    return table
+
 
 def get_stock_root(path: Path) -> Path:
     """
