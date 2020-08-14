@@ -3,11 +3,15 @@
   <br><br><br>
 </div>
 
-
-[![PyPi](https://img.shields.io/pypi/v/stockroom?style=for-the-badge)](https://pypi.python.org/pypi/stockroom)
-[![lgtm](https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge)](https://lgtm.com/projects/g/tensorwerk/stockroom/)
-
-Version control for software 2.0
+<p align="center">
+    <img href="https://codecov.io/gh/tensorwerk/stockroom" alt="Codecov" src="https://img.shields.io/codecov/c/github/tensorwerk/stockroom?style=for-the-badge">
+    <img href="https://pypi.python.org/pypi/stockroom" alt="pypi" src="https://img.shields.io/pypi/v/stockroom?style=for-the-badge">
+    <img href="https://lgtm.com/projects/g/tensorwerk/stockroom/" alt="lgtm" src="https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge">
+    <img href="https://github.com/psf/black" alt="lgtm" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge">
+</p>
+<p align="center">
+    Version control for software 2.0
+</p>
 
 ---
 
@@ -67,7 +71,7 @@ for e in range(epochs):
 
 
 ## Contributing
-We'd love to have you in the contributors list. Do check out the [contribution guide](contributing.md) before submitting a PR.
+We'd love to have you in the contributors list. Do check out the [contribution guide](CONTRIBUTING.md) before submitting a PR.
 Here is our latest #Hall-Of-Fame
 
 [![](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/images/0)](https://sourcerer.io/fame/hhsecond/tensorwerk/stockroom/links/0)

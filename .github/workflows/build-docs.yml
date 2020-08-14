@@ -1,4 +1,4 @@
-name: Test Docs
+name: Build Docs
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ jobs:
           python-version: '3.8'
       - name: Install dependencies
         run: |
-          python3 -m pip install -r docs/requirements.txt
-          python3 -m pip install .
+          pip install -r docs/requirements.txt
+          pip install .
       - name: Build Docs
         run: bash ./scripts/build_docs.sh
