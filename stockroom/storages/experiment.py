@@ -18,8 +18,9 @@ class Experiment:
     >>> stock.experiment['lr'] = 0.0001
     >>> stock.experiment['optimizer'] = 'adam'
     """
+
     def __init__(self, accessor):
-        self.typecaster = {'int': int, 'float': float, 'str': str}
+        self.typecaster = {"int": int, "float": float, "str": str}
         self.accessor = accessor
         self.tagkey = parser.tagkey()
         self.tagtypekey = parser.tag_typekey()
@@ -27,11 +28,11 @@ class Experiment:
     def __setitem__(self, key, value):
         writer = self.accessor
         if isinstance(value, int):
-            value_type = 'int'
+            value_type = "int"
         elif isinstance(value, float):
-            value_type = 'float'
+            value_type = "float"
         elif isinstance(value, str):
-            value_type = 'str'
+            value_type = "str"
         else:
             raise TypeError("Tag store can accept only ``int``, ``float`` or ``str``")
         if self.tagkey not in writer.columns.keys():
@@ -51,5 +52,7 @@ class Experiment:
         try:
             return self.typecaster[value_type](value)
         except KeyError:
-            raise KeyError(f"Data tampering suspected. Could not "
-                           f"read the data type {value_type}")
+            raise KeyError(
+                f"Data tampering suspected. Could not "
+                f"read the data type {value_type}"
+            )

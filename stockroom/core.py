@@ -1,12 +1,12 @@
-from typing import Union
-from pathlib import Path
-from contextlib import contextmanager, ExitStack
 import logging
 import time
+from contextlib import ExitStack, contextmanager
+from pathlib import Path
+from typing import Union
 
 from hangar import Repository
-from stockroom.storages import Model, Data, Experiment
-from stockroom.utils import get_stock_root, get_current_head, set_current_head
+from stockroom.storages import Data, Experiment, Model
+from stockroom.utils import get_current_head, get_stock_root, set_current_head
 
 logger = logging.getLogger(__name__)  # TODO make the formatter and stuffs like that
 
@@ -46,12 +46,15 @@ class StockRoom:
     path to the repository explicitly. The rationale here is, if you provide the path, we
     trust you that you know what you doing on that path
     """
+
     def __init__(self, path: Union[str, Path] = None, write: bool = False):
         # TODO: context manager on Object creation
         # TODO: make force_release_writer_lock easier with stockroom?
         self.path = Path(path) if path else get_stock_root(Path.cwd())
         self._repo = Repository(self.path)
-        self.head = get_current_head(self.path)  # TODO: should this be None if writer enabled
+        self.head = get_current_head(
+            self.path
+        )  # TODO: should this be None if writer enabled
         if write:
             self.accessor = self._repo.checkout(write=True)
         else:
@@ -60,28 +63,25 @@ class StockRoom:
             else:
                 self.accessor = self._repo.checkout(commit=self.head).__enter__()
 
-        if self.accessor:
-            self.model = Model(self.accessor)
-            self.data = Data(self.accessor)
-            self.experiment = Experiment(self.accessor)
-        else:
-            self.model = None
-            self.data = None
-            self.experiment = None
+        self.model = Model(self.accessor)
+        self.data = Data(self.accessor)
+        self.experiment = Experiment(self.accessor)
 
     @contextmanager
-    def run(self, autocommit=True, commit_msg=f'Auto-committing at {time.time()}'):
+    def run(self, autocommit=True, commit_msg=f"Auto-committing at {time.time()}"):
         # TODO: check whether opening in multiple context managers has any problem or not
         with ExitStack() as stack:
             stack.enter_context(self.accessor)
             yield
-        if autocommit and self.accessor.diff.status() != 'CLEAN':
+        if autocommit and self.accessor.diff.status() != "CLEAN":
             self.accessor.commit(commit_msg)
 
     def update_head(self):
         if self._repo.writer_lock_held:
-            logger.info("Write enabled checkouts will always be on the latest head "
-                        "(staging). Doing nothing")
+            logger.info(
+                "Write enabled checkouts will always be on the latest head "
+                "(staging). Doing nothing"
+            )
             return
         self.head = get_current_head(self.path)
         self.accessor.__exit__()

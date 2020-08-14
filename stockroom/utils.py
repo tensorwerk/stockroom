@@ -1,5 +1,5 @@
-import types
 import importlib
+import types
 from pathlib import Path
 
 
@@ -21,17 +21,19 @@ def get_stock_root(path: Path) -> Path:
         Location of root of stock repo
     """
     while True:
-        stock_exist = path.joinpath('head.stock').exists()
+        stock_exist = path.joinpath("head.stock").exists()
         if stock_exist:
-            hangar_exist = path.joinpath('.hangar').exists()
-            git_exist = path.joinpath('.git').exists()
+            hangar_exist = path.joinpath(".hangar").exists()
+            git_exist = path.joinpath(".git").exists()
             if not hangar_exist and not git_exist:
-                raise RuntimeError("Stock root should be the root of git and"
-                                   "hangar repository")
+                raise RuntimeError(
+                    "Stock root should be the root of git and" "hangar repository"
+                )
             return path
         if path == path.parent:  # system root check
-            raise RuntimeError("Could not find stock root. Are you in a "
-                               "stock repository")
+            raise RuntimeError(
+                "Could not find stock root. Are you in a " "stock repository"
+            )
         path = path.parent
 
 
@@ -49,9 +51,9 @@ def get_current_head(root: Path) -> str:
     str
         commit hash if found. Empty string other wises
     """
-    with open(root/'head.stock', 'r') as f:
+    with open(root / "head.stock", "r") as f:
         commit = f.read()
-        return commit if commit else ''
+        return commit if commit else ""
 
 
 def set_current_head(root: Path, commit: str):
@@ -65,7 +67,7 @@ def set_current_head(root: Path, commit: str):
     commit : str
         Commit hash that will be written to the stock file
     """
-    with open(root/'head.stock', 'w+') as f:
+    with open(root / "head.stock", "w+") as f:
         f.write(commit)
 
 
@@ -99,4 +101,3 @@ class LazyLoader(types.ModuleType):
     def __dir__(self):
         module = self._load()
         return dir(module)
-

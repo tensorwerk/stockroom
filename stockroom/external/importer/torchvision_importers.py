@@ -1,23 +1,21 @@
 import os
 
 try:
-    from torchvision import datasets
+    from torchvision import datasets  # type: ignore
 except ModuleNotFoundError:
     pass
 import numpy as np
-
 from stockroom.external.importer.base import BaseImporter
 
 
 class TorchvisionCommon(BaseImporter):
-
     def __init__(self, dataset, train):
         self.dataset = dataset
-        self.split = 'train' if train else 'test'
+        self.split = "train" if train else "test"
         self.sample_img, self.sample_label = self._process_data(*self.dataset[0])
 
     def column_names(self):
-        return f'{self.name}-{self.split}-image', f'{self.name}-{self.split}-label'
+        return f"{self.name}-{self.split}-image", f"{self.name}-{self.split}-label"
 
     def shapes(self):
         return self.sample_img.shape, self.sample_label.shape
@@ -53,7 +51,7 @@ class TorchvisionCommon(BaseImporter):
 
 
 class Cifar10(TorchvisionCommon):
-    name = 'cifar10'
+    name = "cifar10"
 
     @classmethod
     def gen_splits(cls, root):
@@ -69,7 +67,7 @@ class Cifar10(TorchvisionCommon):
 
 
 class Mnist(TorchvisionCommon):
-    name = 'mnist'
+    name = "mnist"
 
     @classmethod
     def gen_splits(cls, root):
@@ -77,7 +75,7 @@ class Mnist(TorchvisionCommon):
 
 
 class FashionMnist(TorchvisionCommon):
-    name = 'fashion_mnist'
+    name = "fashion_mnist"
 
     @classmethod
     def gen_splits(cls, root):

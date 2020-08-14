@@ -2,7 +2,7 @@ import abc
 
 
 class BaseImporter(abc.ABC):
-    name = None
+    name: str = "base"
 
     @abc.abstractmethod
     def column_names(self):
@@ -72,4 +72,3 @@ class BaseImporter(abc.ABC):
         Return the length of the dataset. Simlar to `len(pytorch_dataset)`
         """
         pass
-

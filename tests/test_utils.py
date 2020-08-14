@@ -1,6 +1,7 @@
-from pathlib import Path
-import pytest
 import os
+from pathlib import Path
+
+import pytest
 import stockroom.utils as utils
 
 
@@ -9,13 +10,13 @@ def test_get_stock_root(repo):
     root = utils.get_stock_root(cwd)
     assert root == cwd
 
-    os.rmdir(cwd/'.git')
+    os.rmdir(cwd / ".git")
     root = utils.get_stock_root(cwd)
     assert root == cwd
 
-    root = utils.get_stock_root(cwd/'dummy/path')
+    root = utils.get_stock_root(cwd / "dummy/path")
     assert root == cwd
 
-    path = Path('/down/the/rabbit/hole')
+    path = Path("/down/the/rabbit/hole")
     with pytest.raises(RuntimeError):
         utils.get_stock_root(path)

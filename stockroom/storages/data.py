@@ -23,6 +23,7 @@ class Data:
     >>> with stock.run():
     ...     sample = stock.data['coloumn1']['sample1']
     """
+
     def __init__(self, accessor):
         self.accessor = accessor
 
