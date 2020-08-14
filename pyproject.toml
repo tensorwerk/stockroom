@@ -1,10 +1,10 @@
 [build-system]
+
 requires = ["setuptools", "wheel"]  # PEP 508 specifications.
 build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 88
-target-version = ['py37']
 include = '\.pyi?$'
 exclude = '''
 
@@ -29,22 +29,3 @@ exclude = '''
 [tool.isort]
 profile = "black"
 known_third_party = ["stockroom", "hangar"]
-
-
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-isolated_build = True
-envlist = py36,py37,py38
-
-[deps]
-deps =
-    pytest
-    pytest-xdist
-    pytest-cov
-    torch == 1.6.0
-
-[testenv]
-deps = {[deps]deps}
-commands = pytest
-"""
