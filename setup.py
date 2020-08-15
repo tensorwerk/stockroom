@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 with open('README.md') as readme_file:
     readme = readme_file.read().split('<!--- marker-for-pypi-to-trim --->')[0]
 
-requirements = ['Click>=7.0', 'click_didyoumean', 'hangar>=0.5.0']
+requirements = ['Click>=7.0', 'click_didyoumean', 'hangar>=0.5.0', 'rich']
 
 setup(
     author="Sherin Thomas",
