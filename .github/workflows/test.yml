@@ -23,7 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install pytest pytest-cov mypy black isort torch
+          pip install pytest pytest-cov mypy black isort==5.1.4 torch
           pip install .
       - name: Test
         run: bash scripts/test.sh

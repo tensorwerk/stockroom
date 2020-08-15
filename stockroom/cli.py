@@ -2,14 +2,13 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import click
+from click_didyoumean import DYMGroup  # type: ignore
 from hangar import Repository
 from rich.progress import Progress
 from stockroom import __version__, external
 from stockroom.core import StockRoom
 from stockroom.keeper import init_repo
 from stockroom.utils import console, new_columns_table
-
-from click_didyoumean import DYMGroup  # type: ignore
 
 
 @click.group(
