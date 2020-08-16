@@ -12,7 +12,9 @@
     <img href="https://github.com/psf/black" alt="lgtm" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge">
 </p>
 
-Version control for software 2.0
+<p align="center">
+    Version control for software 2.0
+</p>
 
 
 # Introduction
