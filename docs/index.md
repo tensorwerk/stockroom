@@ -6,10 +6,10 @@
 
 
 <p align="center">
-    <img href="https://codecov.io/gh/tensorwerk/stockroom" alt="Codecov" src="https://img.shields.io/codecov/c/github/tensorwerk/stockroom?style=for-the-badge">
-    <img href="https://pypi.python.org/pypi/stockroom" alt="pypi" src="https://img.shields.io/pypi/v/stockroom?style=for-the-badge">
-    <img href="https://lgtm.com/projects/g/tensorwerk/stockroom/" alt="lgtm" src="https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge">
-    <img href="https://github.com/psf/black" alt="lgtm" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge">
+    <a href="https://codecov.io/gh/tensorwerk/stockroom"><img alt="Codecov" src="https://img.shields.io/codecov/c/github/tensorwerk/stockroom?style=for-the-badge"></a>
+    <a href="https://pypi.python.org/pypi/stockroom"><img alt="pypi" src="https://img.shields.io/pypi/v/stockroom?style=for-the-badge"></a>
+    <a href="https://lgtm.com/projects/g/tensorwerk/stockroom/"><img alt="lgtm" src="https://img.shields.io/lgtm/grade/python/github/tensorwerk/stockroom?style=for-the-badge"></a>
+    <a href="https://github.com/psf/black"><img alt="lgtm" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge"></a>
 </p>
 
 <p align="center">
