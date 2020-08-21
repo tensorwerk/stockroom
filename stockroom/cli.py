@@ -8,7 +8,7 @@ from rich.progress import Progress
 from stockroom import __version__, external
 from stockroom.core import StockRoom
 from stockroom.keeper import init_repo
-from stockroom.utils import console, new_columns_table
+from stockroom.utils import print_columns_added
 
 
 @click.group(
@@ -141,4 +141,4 @@ def import_data(dataset_name, download_dir):
     stock_obj.commit(f"Data from {dataset_name} added through stock import")
     stock_obj.close()
     click.echo(f"The {dataset_name} dataset has been added to StockRoom.")
-    console.print(new_columns_table(splits_added))
+    print_columns_added(splits_added)

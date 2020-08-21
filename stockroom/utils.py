@@ -10,7 +10,7 @@ from rich.table import Table
 console = Console()
 
 
-def new_columns_table(splits_added: dict) -> Table:
+def print_columns_added(splits_added: dict) -> Table:
     """
     Builds a Rich Table with the infor about the new columns created.
 
@@ -33,7 +33,7 @@ def new_columns_table(splits_added: dict) -> Table:
         column_names, num_samples = splits_added[split]
         table.add_row(split + f" [{num_samples}]", ", ".join(column_names))
 
-    return table
+    console.print(table)
 
 
 def get_stock_root(path: Path) -> Path:
