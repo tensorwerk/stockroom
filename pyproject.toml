@@ -28,3 +28,24 @@ exclude = '''
 [tool.isort]
 profile = "black"
 known_third_party = ["stockroom", "hangar"]
+
+
+[tool.coverage.paths]
+source = ["stockroom"]
+
+
+[tool.coverage.run]
+branch = true
+source = ["stockroom", "tests"]
+parallel = true
+
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "pass",
+    "def __repr__",
+    "def _repr_pretty_",
+    "def _ipython_key_completions_"]
+show_missing = true
+precision = 2
