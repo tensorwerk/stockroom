@@ -4,7 +4,9 @@ from pathlib import Path
 import hangar
 import numpy as np
 import pytest
+from PIL import Image
 from stockroom import StockRoom, keeper
+from torchvision import datasets
 
 
 @pytest.fixture()
@@ -47,3 +49,23 @@ def writer_stock(repo_with_col):
     stock_obj = StockRoom(write=True)
     yield stock_obj
     stock_obj._repo._env._close_environments()
+
+
+class CIFAR10:
+    def __init__(self, root, train, download):
+        pass
+
+    def __len__(self):
+        return 1
+
+    def __iter__(self):
+        yield self[0]
+
+    def __getitem__(self, index):
+        img = np.random.random((32, 32, 3)).astype(np.uint8)
+        return Image.fromarray(img), index
+
+
+@pytest.fixture()
+def torchvision_cifar10(monkeypatch):
+    monkeypatch.setattr(datasets, "CIFAR10", CIFAR10)
