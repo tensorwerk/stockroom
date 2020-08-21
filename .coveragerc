@@ -11,6 +11,7 @@ parallel = True
 [report]
 exclude_lines =
     pragma: no cover
+    pass
     def __repr__
     def _repr_pretty_
     def _ipython_key_completions_

@@ -15,10 +15,12 @@ def get_model():
 # TODO: Ingore warning has no effect
 @pytest.mark.filterwarnings("ignore:the imp module is deprecated:DeprecationWarning")
 def test_saving_model(writer_stock):
+    assert writer_stock.model.keys() == tuple()
     model = get_model()
     old_weights = model.state_dict()
     writer_stock.model["model"] = old_weights
     writer_stock.commit("adding model")
+    assert writer_stock.model.keys() == ("model",)
 
     model = get_model()
     tmp_weights = deepcopy(model.state_dict())
