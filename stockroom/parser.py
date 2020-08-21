@@ -1,20 +1,22 @@
 SEP = "--_"
 PREFIX = "_STK"
 
+# TODO: Move the parsing logic to each storage module
+
 
 # ===================================================================
 #         Metadata & Column key parsers for model store
 # ===================================================================
 def model_metakey(name):
-    return f"{PREFIX}{SEP}{name}{SEP}meta"
+    return f"{PREFIX}M{SEP}{name}{SEP}meta"
 
 
 def modelkey(name, longest, dtype):
-    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}{dtype}"
+    return f"{PREFIX}M{SEP}{name}{SEP}{longest}{SEP}{dtype}"
 
 
 def model_shapekey(name, longest):
-    return f"{PREFIX}{SEP}{name}{SEP}{longest}{SEP}shape"
+    return f"{PREFIX}M{SEP}{name}{SEP}{longest}{SEP}shape"
 
 
 # ===================================================================
