@@ -101,7 +101,7 @@ def liberate():
 @click.option(
     "--download-dir",
     "-d",
-    default=Path.home(),
+    default=Path.cwd(),
     type=click.Path(),
     help=(
         "If you have the dataset downloaded in a non-default path or want "
@@ -144,12 +144,29 @@ def import_data(dataset_name, download_dir):
             for colname, dtype, shape in zip(column_names, dtypes, shapes):
                 if colname not in co.keys():
                     # TODO: this assuming importer always return a numpy flat array
-                    new_col_details.append(
-                        (
-                            "add_ndarray_column",
-                            {"name": colname, "dtype": dtype, "shape": shape},
+
+                    contains_subsamples = False
+                    if isinstance(dtype, list):
+                        contains_subsamples = True
+                        dtype = dtype[0]
+
+                    if isinstance(dtype, str):
+                        new_col_details.append(
+                                (
+                                    "add_str_column",
+                                    {"name": colname,
+                                     "contains_subsamples": contains_subsamples}
+                                    )
+                                )
+                    else:
+                        new_col_details.append(
+                            (
+                                "add_ndarray_column",
+                                {"name": colname, "dtype": dtype, "shape": shape,
+                                 'contains_subsamples': contains_subsamples,
+                                 'variable_shape': is_variable},
+                            )
                         )
-                    )
             clean_create_column(co, new_col_details)
 
             columns = [co[name] for name in column_names]
