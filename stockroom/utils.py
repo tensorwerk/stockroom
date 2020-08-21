@@ -10,7 +10,7 @@ from rich.table import Table
 console = Console()
 
 
-def print_columns_added(splits_added: dict) -> Table:
+def print_columns_added(splits_added: dict):
     """
     Builds a Rich Table with the infor about the new columns created.
 
