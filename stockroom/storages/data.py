@@ -1,3 +1,6 @@
+from stockroom import parser
+
+
 class Data:
     """
     Data storage is essentially a wrapper over hangar's column API which let stockroom
@@ -36,3 +39,12 @@ class Data:
 
     def __getitem__(self, key):
         return self.accessor[key]
+
+    def keys(self):
+        return tuple(
+            (
+                keys
+                for keys in self.accessor.keys()
+                if not keys.startswith(parser.PREFIX)
+            )
+        )

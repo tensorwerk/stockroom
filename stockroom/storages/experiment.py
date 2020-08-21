@@ -56,3 +56,9 @@ class Experiment:
                 f"Data tampering suspected. Could not "
                 f"read the data type {value_type}"
             )
+
+    def keys(self):
+        try:
+            return tuple(self.accessor[self.tagkey].keys())
+        except KeyError:
+            return tuple()

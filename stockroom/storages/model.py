@@ -128,3 +128,12 @@ class Model:
                     f"in the current environment. i.e {tf.__version__}"
                 )
             return weights
+
+    def keys(self):
+        out = set()
+        for key in self.accessor.keys():
+            if key.startswith(f"{parser.PREFIX}M"):
+                # second element is name
+                out.add(key.split(parser.SEP)[1])
+        return tuple(out)
+
