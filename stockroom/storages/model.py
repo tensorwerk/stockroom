@@ -136,4 +136,3 @@ class Model:
                 # second element is name
                 out.add(key.split(parser.SEP)[1])
         return tuple(out)
-

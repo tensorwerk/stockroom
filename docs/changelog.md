@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## In Progress
 
+* [**Breaking Change**] `.keys()` returns relevant keys. This change breaks the model storage APIs [#35](https://github.com/tensorwerk/stockroom/pull/35) [@hhsecond](https://github.com/hhecond)
+* [Rich](https://rich.readthedocs.io/en/latest/) based console [#32](https://github.com/tensorwerk/stockroom/pull/32) [@jjmachan](https://github.com/jjmachan) 
+
 #### Fixed
 
 * Structural change and shape error fix in `import` utility [#27](https://github.com/tensorwerk/stockroom/pull/27) [@jjmachan](https://github.com/jjmachan)
