@@ -59,7 +59,7 @@ downloadbar = Progress(
 unzipbar = Progress(transient=True,)
 
 
-def download(urls: dict, dest_dir: str):
+def download(urls: dict, dest_dir: Path):
     """
     Downloads multiple files into the given directory.
 
@@ -85,7 +85,7 @@ def download(urls: dict, dest_dir: str):
                     downloadbar.update(t, advance=len(data), refresh=True)
 
 
-def unzip(files: list, dest_dir: str):
+def unzip(files: list, dest_dir: Path):
     """
     Extracts a list of file to the destination directory.
 

@@ -1,5 +1,6 @@
 import os
 from collections import defaultdict
+from pathlib import Path
 
 import numpy as np
 from stockroom.external.importer.base import BaseImporter
@@ -8,9 +9,9 @@ try:
     from torchvision import datasets  # type: ignore
 except ModuleNotFoundError:
     pass
-import stockroom.external.importer.utils as utils
 from rich.console import Console
 from rich.table import Table
+from stockroom.external.importer import utils
 
 
 class TorchvisionCommon(BaseImporter):
@@ -169,42 +170,141 @@ class ImageFolder(BaseImporter):
         console.print(table)
 
 
-class COCO(BaseImporter):
-    name = "coco"
+def setup_coco_file(root: Path):
+    """
+    This is a Utility function for the Coco dataset. This function checks for any files
+    downloaded and if not it downloads and sets it up for you.
+    """
+    urls = {
+        "train.zip": "http://images.cocodataset.org/zips/train2017.zip",
+        "val.zip": "http://images.cocodataset.org/zips/val2017.zip",
+        "test.zip": "http://images.cocodataset.org/zips/test2017.zip",
+        "annotations.zip": "http://images.cocodataset.org/annotations/annotations_trainval2017.zip",
+    }
 
-    def __init__(self):
-        urls = {
-            "stockroom.zip": "https://github.com/tensorwerk/stockroom/archive/master.zip",
-            # 'val': 'http://images.cocodataset.org/annotations/annotations_trainval2017.zip',
-            # 'test': 'http://images.cocodataset.org/annotations/annotations_trainval2017.zip',
-            "hangarboard.zip": "https://github.com/tensorwerk/hangarboard/archive/master.zip",
-        }
-        self.dest_dir = "/home/jamesjithin97/datasets/.stock"
-        if not os.path.isdir(self.dest_dir):
-            os.makedirs(self.dest_dir)
+    all_files_present = True
+    for file in urls:
+        if not os.path.exists(root / file):
+            all_files_present = False
+            break
 
-        utils.get_files(urls, self.dest_dir)
+    # if not present download
+    if not all_files_present:
+        print("COCO files not found. Downloading...")
+        utils.download(urls, root)
+        files = [os.path.join(root, file) for file in urls]
+        utils.unzip(files, root)
+
+
+class COCOCaptions(BaseImporter):
+    name = "coco_captions"
+
+    def __init__(self, root, ann_file, split):
+        self.dataset = datasets.CocoCaptions(root, ann_file)
+        self.split = split
+        self.sample_img, self.sample_captions = self._process_data(*self.dataset[0])
 
     def column_names(self):
-        pass
+        return f"{self.name}-{self.split}-image", f"{self.name}-{self.split}-captions"
 
     def shapes(self):
-        pass
+        return ((3, 640, 640), None)
 
     def variability_status(self):
-        pass
+        return True, False
 
     def dtypes(self):
-        pass
-
-    def gen_splits(cls):
-        pass
+        return self.sample_img.dtype, ["str"]
 
     def __iter__(self):
-        pass
+        for img, captions in self.dataset:
+            yield self._process_data(img, captions)
 
     def __len__(self):
-        pass
+        return len(self.dataset)
+
+    @staticmethod
+    def _process_data(img, captions):
+        img = np.transpose(np.array(img), (2, 0, 1))
+        img = np.ascontiguousarray(img)
+        captions = {i: cap for i, cap in enumerate(captions)}
+
+        return img, captions
+
+    @classmethod
+    def gen_splits(cls, root):
+        root = Path(root)
+        setup_coco_file(root)
+
+        # files for training
+        train_imgs = root / "train2017"
+        val_imgs = root / "val2017"
+
+        train_annotations = root / "annotations/captions_train2017.json"
+        val_annotations = root / "annotations/captions_val2017.json"
+
+        return [
+            cls(train_imgs, train_annotations, "train"),
+            cls(val_imgs, val_annotations, "val"),
+        ]
+
+
+class COCODetection(BaseImporter):
+    name = "coco_detection"
+
+    def __init__(self, root, ann_file, split):
+        self.dataset = datasets.CocoDetection(root, ann_file)
+        self.split = split
+        self.sample_img, self.sample_boxes = self._process_data(*self.dataset[0])
+
+    def column_names(self):
+        return f"{self.name}-{self.split}-image", f"{self.name}-{self.split}-boxes"
+
+    def shapes(self):
+        _, box = self.sample_boxes.popitem()
+        return ((3, 640, 640), box.shape)
+
+    def variability_status(self):
+        return True, False
+
+    def dtypes(self):
+        _, box = self.sample_boxes.popitem()
+        return self.sample_img.dtype, [box.dtype]
+
+    def __iter__(self):
+        for img, boxes in self.dataset:
+            yield self._process_data(img, boxes)
+
+    def __len__(self):
+        return len(self.dataset)
+
+    @staticmethod
+    def _process_data(img, boxes):
+        img = np.transpose(np.array(img), (2, 0, 1))
+        img = np.ascontiguousarray(img)
+
+        boxes = {
+            box["category_id"]: np.array(box["bbox"], dtype=np.float64) for box in boxes
+        }
+
+        return img, boxes
+
+    @classmethod
+    def gen_splits(cls, root):
+        root = Path(root)
+        setup_coco_file(root)
+
+        # files for training
+        train_imgs = root / "train2017"
+        val_imgs = root / "val2017"
+
+        train_annotations = root / "annotations/instances_train2017.json"
+        val_annotations = root / "annotations/instances_val2017.json"
+
+        return [
+            cls(train_imgs, train_annotations, "train"),
+            cls(val_imgs, val_annotations, "val"),
+        ]
 
 
 class VOCSegmentation(BaseImporter):
