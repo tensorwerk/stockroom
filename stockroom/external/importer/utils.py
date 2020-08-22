@@ -1,10 +1,7 @@
 import inspect
 import os.path
-import sys
-from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from pathlib import Path
-from typing import Iterable
 from urllib.request import urlopen
 from zipfile import ZipFile
 
@@ -12,7 +9,6 @@ from rich.progress import (
     BarColumn,
     DownloadColumn,
     Progress,
-    TaskID,
     TextColumn,
     TimeRemainingColumn,
     TransferSpeedColumn,
@@ -57,54 +53,52 @@ downloadbar = Progress(
     TransferSpeedColumn(),
     "•",
     TimeRemainingColumn(),
-    transient=True,
+    transient=False,
 )
 
 unzipbar = Progress(transient=True,)
 
 
-def download_url(task_id: TaskID, url: str, path: str) -> None:
-    """Copy data from a url to a local file."""
-    response = urlopen(url)
-    # This will break if the response doesn't contain content length
-    downloadbar.update(task_id, total=int(response.info()["Content-length"]))
-    with open(path, "wb") as dest_file:
-        downloadbar.start_task(task_id)
-        for data in iter(partial(response.read, 32768), b""):
-            dest_file.write(data)
-            downloadbar.update(task_id, advance=len(data), refresh=True)
-
-
-def unzip(task_id: TaskID, zipfile: str, extract_to: str):
-    with ZipFile(zipfile, "r") as z:
-        unzipbar.update(task_id, total=len(z.namelist()))
-        unzipbar.start_task(task_id)
-        for file in z.namelist():
-            z.extract(file, extract_to)
-            unzipbar.update(task_id, advance=1, refresh=True)
-
-
-def get_files(urls: dict, dest_dir: str):
+def download(urls: dict, dest_dir: str):
     """
-    Download multuple files to the given directory and extract them.
+    Downloads multiple files into the given directory.
+
+    Parameters
+    ----------
+    urls: a dict which maps the final filename to the url you want to download.
+    dest_dir: the path to which you want to download.
     """
+    total_size = sum(
+        [int(urlopen(url).info()["Content-length"]) for url in urls.values()]
+    )
+
     with downloadbar:
-        with ThreadPoolExecutor(max_workers=5) as pool:
-            for url in urls:
-                filename = url
-                dest_path = os.path.join(dest_dir, filename)
-                task_id = downloadbar.add_task(
-                    "download", filename=filename, start=False
-                )
-                pool.submit(download_url, task_id, urls[url], dest_path)
-    print("Downloaded required files!")
+        t = downloadbar.add_task("Downloading...", total=total_size, filename="")
+        for url in urls:
+            filename = url
+            dest_path = os.path.join(dest_dir, filename)
+            response = urlopen(urls[url])
+            downloadbar.update(t, filename=filename)
+            with open(dest_path, "wb") as dest_file:
+                for data in iter(partial(response.read, 32768), b""):
+                    dest_file.write(data)
+                    downloadbar.update(t, advance=len(data), refresh=True)
 
-    with unzipbar:
-        with ThreadPoolExecutor(max_workers=5) as pool:
-            for url in urls:
-                file = os.path.join(dest_dir, url)
-                task_id = unzipbar.add_task(
-                    "extracting", filename=filename, start=False
-                )
-                pool.submit(unzip, task_id, file, dest_dir)
-    print("Extracted downloaded files!")
+
+def unzip(files: list, dest_dir: str):
+    """
+    Extracts a list of file to the destination directory.
+
+    Parameters
+    ----------
+    files:  The list of zip files you want to extract.
+    dest_dir: The directory to which you want to extract it to.
+    """
+    print("Extracting files...")
+    for file in files:
+        file = os.path.join(dest_dir, file)
+        with ZipFile(file, "r") as z:
+            z.extractall(dest_dir)
+
+        file_name = file.split("/")[-1]
+        print(f"Extracted {file_name}!")
