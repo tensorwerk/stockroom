@@ -46,8 +46,8 @@ class StockRoom:
                 stack.enter_context(self.accessor)
                 self._stack = stack.pop_all()
 
-        self.model = Model(self.accessor)
         self.data = Data(self.accessor)
+        self.model = Model(self.accessor)
         self.experiment = Experiment(self.accessor)
 
     @contextmanager
@@ -59,9 +59,14 @@ class StockRoom:
                 "Write access is already enabled. Doing nothing!!", UserWarning
             )
             reader_accessor = None
+            shelves = None
         else:
             reader_accessor = self.accessor
+            shelves = (self.data, self.model, self.experiment)
             self.accessor = self._repo.checkout(write=True)
+            self.data = Data(self.accessor)
+            self.model = Model(self.accessor)
+            self.experiment = Experiment(self.accessor)
         with self.accessor:
             yield
         if autocommit and self.accessor.diff.status() != "CLEAN":
@@ -69,6 +74,7 @@ class StockRoom:
         if reader_accessor:
             self.accessor.close()
             self.accessor = reader_accessor
+            self.data, self.model, self.experiment = shelves
 
     def update_head(self):
         if self._repo.writer_lock_held:
@@ -105,3 +111,8 @@ class StockRoom:
         if update_head:
             self.update_head()
         return digest
+
+    def __getstate__(self):
+        if isinstance(self.accessor, WriterCheckout):
+            raise RuntimeError("Write enabled instance is not pickle-able")
+        return self.__dict__

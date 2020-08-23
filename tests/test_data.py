@@ -12,8 +12,19 @@ def test_save_data(writer_stock):
     del stock
 
 
-def test_fetch_non_existing_column(writer_stock):
+def test_save_with_reader(reader_stock):
+    stock = reader_stock
     arr = np.arange(20).reshape(4, 5)
+    with pytest.raises(TypeError):
+        stock.data["ndcol"][1] = arr + 1
+    with stock.enable_write():
+        stock.data["ndcol"][1] = arr + 1
+        stock.commit("added data")
+    with pytest.raises(AttributeError):
+        stock.commit("added data")
+
+
+def test_fetch_non_existing_column(writer_stock):
     with pytest.raises(KeyError):
         writer_stock.data["wrongcol"]
 
