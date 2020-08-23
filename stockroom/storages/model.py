@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 from stockroom import parser
-from stockroom.utils import LazyLoader
+from stockroom.utils import LazyLoader, clean_create_column
 
 torch = LazyLoader("torch", globals(), "torch")
 tf = LazyLoader("tf", globals(), "tensorflow")
@@ -53,29 +53,48 @@ class Model:
         dtypes = [w.dtype.name for w in weights]
         writer = self.accessor
         metakey = parser.model_metakey(name)
+
+        # ---------- Create columns if doesn't exist -----------------
+
+        new_col_args = []
+
         if metakey not in writer.columns.keys():
-            metacol = writer.add_str_column(metakey)
-        else:
-            metacol = writer[metakey]
+            new_col_args.append(("add_str_column", {"name": metakey}))
+
+        shapeKey = parser.model_shapekey(name, str(longest))
+        if shapeKey not in writer.columns.keys():
+            shape_typ = np.array(1).dtype  # C long = int32 in win64; int64 elsewhere
+            kwargs = {
+                "name": shapeKey,
+                "shape": 10,
+                "dtype": shape_typ,
+                "variable_shape": True,
+            }
+            new_col_args.append(("add_ndarray_column", kwargs))
+        being_created = set()
+        for i, w in enumerate(weights):
+            modelKey = parser.modelkey(name, str(longest), dtypes[i])
+            if modelKey not in writer.columns.keys() and modelKey not in being_created:
+                being_created.add(modelKey)
+                dtype = np.dtype(dtypes[i])
+                kwargs = {
+                    "name": modelKey,
+                    "shape": longest,
+                    "dtype": dtype,
+                    "variable_shape": True,
+                }
+                new_col_args.append(("add_ndarray_column", kwargs))
+        if new_col_args:
+            clean_create_column(self.accessor, new_col_args)
+        # ---------------------------------------------------------
+
+        metacol = writer[metakey]
         metacol["library"] = library
         metacol["libraryVersion"] = library_version
         metacol["longest"] = str(longest)
         metacol["dtypes"] = parser.stringify(dtypes)
         metacol["numLayers"] = str(len(weights))
         metacol["layers"] = parser.stringify(layers)
-
-        # ---------- Create ndarray columns if doesn't exist -----------------
-        shapeKey = parser.model_shapekey(name, str(longest))
-        if shapeKey not in writer.columns.keys():
-            shape_typ = np.array(1).dtype  # C long = int32 in win64; int64 elsewhere
-            writer.add_ndarray_column(shapeKey, 10, shape_typ, variable_shape=True)
-        for i, w in enumerate(weights):
-            modelKey = parser.modelkey(name, str(longest), dtypes[i])
-            if modelKey not in writer.columns.keys():
-                writer.add_ndarray_column(
-                    modelKey, longest, np.dtype(dtypes[i]), variable_shape=True
-                )
-        # ---------------------------------------------------------
 
         shape_col = writer.columns[shapeKey]
         for i, w in enumerate(weights):

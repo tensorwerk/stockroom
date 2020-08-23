@@ -46,7 +46,7 @@ def repo_with_col(repo):
 
 @pytest.fixture()
 def writer_stock(repo_with_col):
-    stock_obj = StockRoom(write=True)
+    stock_obj = StockRoom(enable_write=True)
     yield stock_obj
     stock_obj._repo._env._close_environments()
 
