@@ -8,4 +8,4 @@ black stockroom tests --check
 isort stockroom tests --check-only
 
 export PYTHONPATH=./docs_src
-pytest --cov=stockroom --cov=tests --cov-report=term-missing --cov-report=xml tests ${@}
+pytest -n 3 --cov=stockroom --cov=tests --cov-report=term-missing --cov-report=xml tests ${@}
