@@ -8,7 +8,7 @@ from stockroom import StockRoom
 class TestSameProcess:
     def test_opening_two_instances(self, writer_stock):
         with pytest.raises(PermissionError):
-            StockRoom(write=True)
+            StockRoom(enable_write=True)
         arr = np.arange(20).reshape(4, 5)
         oldarr = arr * randint(1, 100)
         col1 = writer_stock.data["ndcol"]

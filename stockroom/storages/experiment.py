@@ -1,4 +1,5 @@
 from stockroom import parser
+from stockroom.utils import clean_create_column
 
 
 class Experiment:
@@ -35,10 +36,15 @@ class Experiment:
             value_type = "str"
         else:
             raise TypeError("Tag store can accept only ``int``, ``float`` or ``str``")
+        column_creation_details = []
         if self.tagkey not in writer.columns.keys():
-            writer.add_str_column(self.tagkey)
+            column_creation_details.append(("add_str_column", {"name": self.tagkey}))
         if self.tagtypekey not in writer.columns.keys():
-            writer.add_str_column(self.tagtypekey)
+            column_creation_details.append(
+                ("add_str_column", {"name": self.tagtypekey})
+            )
+        clean_create_column(self.accessor, column_creation_details)
+
         writer[self.tagkey][key] = str(value)
         writer[self.tagtypekey][key] = value_type
 

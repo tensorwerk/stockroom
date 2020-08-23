@@ -27,7 +27,7 @@ def test_init_repo():
 
 def test_commit(repo_with_col):
     runner = CliRunner()
-    stock = StockRoom(write=True)
+    stock = StockRoom(enable_write=True)
     stock.experiment["key"] = "value"
     stock.close()
     res = runner.invoke(cli.commit, [])

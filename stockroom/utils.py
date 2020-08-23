@@ -134,3 +134,15 @@ class LazyLoader(types.ModuleType):
     def __dir__(self):
         module = self._load()
         return dir(module)
+
+
+def clean_create_column(accessor, col_details):
+    is_conman = accessor._is_conman
+    try:
+        if is_conman:
+            accessor.__exit__()
+        for fn_name, kwargs in col_details:
+            getattr(accessor, fn_name)(**kwargs)
+    finally:
+        if is_conman:
+            accessor.__enter__()

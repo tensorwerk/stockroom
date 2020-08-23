@@ -1,14 +1,16 @@
 import logging
 import time
+import warnings
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
 from typing import Union
 
 from hangar import Repository
+from hangar.checkout import WriterCheckout
 from stockroom.storages import Data, Experiment, Model
 from stockroom.utils import get_current_head, get_stock_root, set_current_head
 
-logger = logging.getLogger(__name__)  # TODO make the formatter and stuffs like that
+logger = logging.getLogger(__name__)
 
 
 class StockRoom:
@@ -23,58 +25,50 @@ class StockRoom:
 
     An object of this class holds an object to these three storages each has a dictionary
     style access machinery
-
-    Parameters
-    ----------
-    path : Union[str, Path, None]
-        Path the to the stock repository. If `None`, it traverse up from `pwd` till it
-        finds the stock root (stock root is the location where `head.stock` file is
-        located and ideally will have `.git` folder as well
-
-    Note
-    ----
-    By default (if no path is provided while initializing :class:`StockRoom`), it checks
-    for the stock root. A stock root is a directory that is
-
-    1. a git repository (has .git folder)
-    2. a hangar repository (has .hangar folder)
-    3. a stock repository (has head.stock file)
-
-    If you'd like to skip these checks and just use stockroom (for example: if you are a
-    hangar user and use stockroom just for storing models in your hangar repository, it
-    doesn't need to be a stock repository and hence can skip these checks), provide the
-    path to the repository explicitly. The rationale here is, if you provide the path, we
-    trust you that you know what you doing on that path
     """
 
-    def __init__(self, path: Union[str, Path] = None, write: bool = False):
-        # TODO: context manager on Object creation
-        # TODO: make force_release_writer_lock easier with stockroom?
+    def __init__(self, path: Union[str, Path] = None, enable_write: bool = False):
         self.path = Path(path) if path else get_stock_root(Path.cwd())
         self._repo = Repository(self.path)
         self.head = get_current_head(
             self.path
         )  # TODO: should this be None if writer enabled
-        if write:
+        if enable_write:
             self.accessor = self._repo.checkout(write=True)
         else:
             if not self.head:
                 self.accessor = None
             else:
-                self.accessor = self._repo.checkout(commit=self.head).__enter__()
+                self.accessor = self._repo.checkout(commit=self.head)
+        # TODO: Test this extensively
+        if self.accessor is not None:
+            with ExitStack() as stack:
+                stack.enter_context(self.accessor)
+                self._stack = stack.pop_all()
 
         self.model = Model(self.accessor)
         self.data = Data(self.accessor)
         self.experiment = Experiment(self.accessor)
 
     @contextmanager
-    def run(self, autocommit=True, commit_msg=f"Auto-committing at {time.time()}"):
-        # TODO: check whether opening in multiple context managers has any problem or not
-        with ExitStack() as stack:
-            stack.enter_context(self.accessor)
+    def enable_write(
+        self, autocommit=True, commit_msg=f"Auto-committing at {time.time()}"
+    ):
+        if isinstance(self.accessor, WriterCheckout):
+            warnings.warn(
+                "Write access is already enabled. Doing nothing!!", UserWarning
+            )
+            reader_accessor = None
+        else:
+            reader_accessor = self.accessor
+            self.accessor = self._repo.checkout(write=True)
+        with self.accessor:
             yield
         if autocommit and self.accessor.diff.status() != "CLEAN":
             self.accessor.commit(commit_msg)
+        if reader_accessor:
+            self.accessor.close()
+            self.accessor = reader_accessor
 
     def update_head(self):
         if self._repo.writer_lock_held:
@@ -89,6 +83,7 @@ class StockRoom:
         self.accessor = self._repo.checkout(commit=self.head).__enter__()
 
     def close(self):
+        self._stack.close()
         self.accessor.close()
 
     @property

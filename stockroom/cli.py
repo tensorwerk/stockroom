@@ -1,4 +1,3 @@
-from contextlib import ExitStack
 from pathlib import Path
 
 import click
@@ -8,7 +7,7 @@ from rich.progress import Progress
 from stockroom import __version__, external
 from stockroom.core import StockRoom
 from stockroom.keeper import init_repo
-from stockroom.utils import print_columns_added
+from stockroom.utils import clean_create_column, print_columns_added
 
 
 @click.group(
@@ -70,7 +69,7 @@ def commit(message):
         raise click.ClickException(ValueError("Require commit message"))
     # TODO: There should be a way to share the write enabled checkout if user need to
     #  commit let's say when he has a writer checkout open in jupyter notebook
-    stock_obj = StockRoom(write=True)
+    stock_obj = StockRoom(enable_write=True)
     msg = "\n".join(message)
     click.echo("Commit message:\n" + msg)
     try:
@@ -116,7 +115,7 @@ def import_data(dataset_name, download_dir):
     into a repo for you
     """
     try:
-        stock_obj = StockRoom(write=True)
+        stock_obj = StockRoom(enable_write=True)
     except RuntimeError:
         repo = Repository(".", exists=False)
         if not repo.initialized:
@@ -140,20 +139,24 @@ def import_data(dataset_name, download_dir):
             shapes = importer.shapes()
             splits_added[importer.split] = (column_names, len(importer))
 
+            new_col_details = []
             for colname, dtype, shape in zip(column_names, dtypes, shapes):
                 if colname not in co.keys():
                     # TODO: this assuming importer always return a numpy flat array
-                    co.add_ndarray_column(colname, dtype=dtype, shape=shape)
+                    new_col_details.append(
+                        (
+                            "add_ndarray_column",
+                            {"name": colname, "dtype": dtype, "shape": shape},
+                        )
+                    )
+            clean_create_column(co, new_col_details)
 
             columns = [co[name] for name in column_names]
-            with ExitStack() as stack:
-                for col in columns:
-                    stack.enter_context(col)
-                for i, data in enumerate(importer):
-                    progress.advance(stock_add_bar)
-                    for col, dt in zip(columns, data):
-                        # TODO: use the keys from importer
-                        col[i] = dt
+            for i, data in enumerate(importer):
+                progress.advance(stock_add_bar)
+                for col, dt in zip(columns, data):
+                    # TODO: use the keys from importer
+                    col[i] = dt
 
     stock_obj.commit(f"Data from {dataset_name} added through stock import")
     stock_obj.close()
