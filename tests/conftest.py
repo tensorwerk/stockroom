@@ -51,6 +51,18 @@ def writer_stock(repo_with_col):
     stock_obj._repo._env._close_environments()
 
 
+@pytest.fixture()
+def reader_stock(writer_stock):
+    arr = np.arange(20).reshape(4, 5)
+    col = writer_stock.data["ndcol"]
+    col[1] = arr
+    writer_stock.commit("added first data point")
+    writer_stock.close()
+    stock_obj = StockRoom()
+    yield stock_obj
+    stock_obj._repo._env._close_environments()
+
+
 class CIFAR10:
     def __init__(self, root, train, download):
         pass

@@ -19,4 +19,7 @@ class TestSameProcess:
         col2 = stock2.data["ndcol"]
 
         assert np.allclose(col2[1], oldarr)
+        with pytest.raises(PermissionError):
+            with stock2.enable_write():
+                pass
         stock2._repo._env._close_environments()
