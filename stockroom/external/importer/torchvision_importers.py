@@ -88,18 +88,18 @@ class FashionMnist(TorchvisionCommon):
         return super().gen_splits(datasets.FashionMNIST, root)
 
 
+# TODO: make process_data consistant, and use counters
 class ImageFolder(BaseImporter):
-    name = "imagefolder"
+    name = "image_folder"
 
     def __init__(self, root):
+        root = Path(root)
         try:
             self.dataset = datasets.ImageFolder(root)
         except FileNotFoundError:
-            raise RuntimeError(
-                f"Cannot find the directory '{os.path.expanduser(root)}'"
-            )
+            raise RuntimeError(f"Cannot find the directory '{root.expanduser()}'")
 
-        self.base_folder = os.path.expanduser(root).split("/")[-1]
+        self.split = root.name
         self.sample_img, self.sample_label = self._process_data(*self.dataset[0])
 
         self._gen_metadata()
@@ -107,12 +107,12 @@ class ImageFolder(BaseImporter):
 
     def column_names(self):
         return (
-            f"{self.name}-{self.base_folder}-image",
-            f"{self.name}-{self.base_folder}-label",
+            f"{self.name}-{self.split}-image",
+            f"{self.name}-{self.split}-label",
         )
 
     def shapes(self):
-        return self.shape
+        return self._shape
 
     def dtypes(self):
         return self.sample_img.dtype, self.sample_label.dtype
@@ -140,7 +140,7 @@ class ImageFolder(BaseImporter):
     def _gen_metadata(self):
         print("Parsing data...")
         H = W = 0
-        self.sample_counter = defaultdict(int)
+        sample_counter = defaultdict(int)
         for img, lbl in self.dataset:
             # find max height/width
             h, w = img.size
@@ -150,9 +150,9 @@ class ImageFolder(BaseImporter):
                 W = w
 
             # find num samples in each class
-            self.sample_counter[lbl] += 1
+            sample_counter[lbl] += 1
         _, _, c = self.sample_img.shape
-        self.shape = ((W, H, c), self.sample_label.shape)
+        self._shape = ((W, H, c), self.sample_label.shape)
 
     def _print_table(self):
         table = Table(title="Sample Distribution")
@@ -208,7 +208,7 @@ class COCOCaptions(BaseImporter):
         return f"{self.name}-{self.split}-image", f"{self.name}-{self.split}-captions"
 
     def shapes(self):
-        return ((3, 640, 640), None)
+        return (3, 640, 640), None
 
     def variability_status(self):
         return True, False
@@ -261,14 +261,14 @@ class COCODetection(BaseImporter):
         return f"{self.name}-{self.split}-image", f"{self.name}-{self.split}-boxes"
 
     def shapes(self):
-        _, box = self.sample_boxes.popitem()
-        return ((3, 640, 640), box.shape)
+        _, box = list(self.sample_boxes.items())[0]
+        return (3, 640, 640), box.shape
 
     def variability_status(self):
         return True, False
 
     def dtypes(self):
-        _, box = self.sample_boxes.popitem()
+        _, box = list(self.sample_boxes.items())[0]
         return self.sample_img.dtype, [box.dtype]
 
     def __iter__(self):
@@ -320,7 +320,7 @@ class VOCSegmentation(BaseImporter):
         return f"{self.name}-{self.split}-image", f"{self.name}-{self.split}-segment"
 
     def shapes(self):
-        return ((3, 500, 500), (500, 500))
+        return (3, 500, 500), (500, 500)
 
     def dtypes(self):
         return self.sample_img.dtype, self.sample_seg.dtype
@@ -368,7 +368,7 @@ class VOCDetection(BaseImporter):
         )
 
     def shapes(self):
-        return ((3, 500, 500), None, self.boxes[0].shape)
+        return (3, 500, 500), None, self.boxes[0].shape
 
     def dtypes(self):
         return self.sample_img.dtype, ["str"], [self.boxes[0].dtype]

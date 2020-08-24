@@ -152,19 +152,25 @@ def import_data(dataset_name, download_dir):
 
                     if isinstance(dtype, str):
                         new_col_details.append(
-                                (
-                                    "add_str_column",
-                                    {"name": colname,
-                                     "contains_subsamples": contains_subsamples}
-                                    )
-                                )
+                            (
+                                "add_str_column",
+                                {
+                                    "name": colname,
+                                    "contains_subsamples": contains_subsamples,
+                                },
+                            )
+                        )
                     else:
                         new_col_details.append(
                             (
                                 "add_ndarray_column",
-                                {"name": colname, "dtype": dtype, "shape": shape,
-                                 'contains_subsamples': contains_subsamples,
-                                 'variable_shape': is_variable},
+                                {
+                                    "name": colname,
+                                    "dtype": dtype,
+                                    "shape": shape,
+                                    "contains_subsamples": contains_subsamples,
+                                    "variable_shape": is_variable,
+                                },
                             )
                         )
             clean_create_column(co, new_col_details)
