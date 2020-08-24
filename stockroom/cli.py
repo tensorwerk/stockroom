@@ -89,7 +89,7 @@ def liberate():
     If another process, that has the writer lock, is writing to the repo, releasing the
     lock leads to an exception in that process. Use it carefully
     """
-    repo = Repository(".", exists=False)
+    repo = Repository(Path.cwd(), exists=True)
     if repo.force_release_writer_lock():
         click.echo("Writer lock released")
     else:

@@ -58,21 +58,22 @@ class StockRoom:
             warnings.warn(
                 "Write access is already enabled. Doing nothing!!", UserWarning
             )
-            reader_accessor = None
-            shelves = None
+            yield
         else:
             reader_accessor = self.accessor
             shelves = (self.data, self.model, self.experiment)
+
             self.accessor = self._repo.checkout(write=True)
             self.data = Data(self.accessor)
             self.model = Model(self.accessor)
             self.experiment = Experiment(self.accessor)
-        with self.accessor:
-            yield
-        if autocommit and self.accessor.diff.status() != "CLEAN":
-            self.accessor.commit(commit_msg)
-        if reader_accessor:
+
+            with self.accessor:
+                yield
+            if autocommit and self.accessor.diff.status() != "CLEAN":
+                self.accessor.commit(commit_msg)
             self.accessor.close()
+
             self.accessor = reader_accessor
             self.data, self.model, self.experiment = shelves
 
