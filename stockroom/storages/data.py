@@ -20,11 +20,6 @@ class Data:
     >>> stock = StockRoom()
     >>> stock.data['column1']['sample1'] = np.arange(20).reshape(5, 4)
     >>> sample = stock.data['column1']['sample5']
-
-    Inside context manager
-
-    >>> with stock.run():
-    ...     sample = stock.data['coloumn1']['sample1']
     """
 
     def __init__(self, accessor):

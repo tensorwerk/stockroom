@@ -52,7 +52,7 @@ $ pip install stockroom
 ```Python hl_lines="3 4 8 14 15 16"
 from stockroom import StockRoom
 
-stock = StockRoom(write=True)
+stock = StockRoom(enable_write=True)
 model.load_state_dict(stock.model['resnet50'])
 for e in range(epochs):
     for i in range(limit):

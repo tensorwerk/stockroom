@@ -60,9 +60,6 @@ class StockRoom:
             )
             yield
         else:
-            reader_accessor = self.accessor
-            shelves = (self.data, self.model, self.experiment)
-
             self.accessor = self._repo.checkout(write=True)
             self.data = Data(self.accessor)
             self.model = Model(self.accessor)
@@ -74,8 +71,12 @@ class StockRoom:
                 self.accessor.commit(commit_msg)
             self.accessor.close()
 
-            self.accessor = reader_accessor
-            self.data, self.model, self.experiment = shelves
+            # TODO: these objects doesn't need to recreate no column creation inside the CM.
+            #   Find a way to track that
+            self.accessor = self._repo.checkout()
+            self.data = Data(self.accessor)
+            self.model = Model(self.accessor)
+            self.experiment = Experiment(self.accessor)
 
     def update_head(self):
         if self._repo.writer_lock_held:

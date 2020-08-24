@@ -1,6 +1,6 @@
 # 🏃‍♀️ Quick Start
 
-Eager to start using stockroom? This page gives a good and crisp introduction to stockroom.
+Eager to take a quick run through stockroom? This page gives a good and crisp introduction to stockroom.
 
 1. Import a cifar10 dataset from torchvision to stockroom
 2. Train a CNN with this data
@@ -15,11 +15,11 @@ You need to install `stockroom`, `pytorch`, `torchvision` and `matplotlib` for t
 
 ## Introduction
 
-Stockroom exposes the data as three shelves. Data, Model and Experiments. This segregation let stockroom
-to be prejudice about what goes inside and optimize the storage. Stockroom also introduces `stock` CLI
-which gives you the ability to interact with your stockroom repository in a git-like way. Checkout the
-[reference doc](cli.md) for complete CLI reference. You'll be using both the CLI and Python APIs of
-stockroom in this tutorial. 
+Stockroom exposes the environment as three shelves. Data, Model and Experiments. This segregation let
+stockroom to be prejudice about what goes inside and optimize the storage. Stockroom also introduces
+`stock` CLI which gives you the ability to interact with your stockroom repository in a git-like way.
+Checkout the [reference doc](cli.md) for complete CLI reference. You'll be using both the CLI and
+Python APIs of stockroom in this tutorial. 
 
 ## Initialize Stock Repository
 
@@ -47,7 +47,8 @@ StockRoom keeps all your data in `.data` shelf arranged as columns. In our case,
 !!! info "Data is Tensor"
     Stockroom makes strong assumptions about your data. Any data point that goes into stockroom must be
     a tensor a.k.a `numpy.ndarray` object. It is why stockroom could optimize the data storage
-    and versioning efficiently. Also, know that, we have borrowed this philosophy from Hangar 
+    and versioning efficiently. Also, know that, this philosophy is originally from Hangar and we use
+    Hangar internally for all type of storages 
 
 <div class="termy">
 
@@ -122,9 +123,14 @@ imshow(img)
 
 !!! info "Read Access"
     Making `stock` object as given above will only give you a read enabled object. For saving data, you'd need
-    to make a write enabled object using
+    to open the `enable_write` context manager or create the `stock` object by enabling write mode.
     ```python
-    stock = StockRoom(write=True)
+    stock = StockRoom()
+    with stock.enable_write():
+        write_into(stock)
+    # or
+    stock = StockRoom(enable_write=True)
+    write_into(stock)
     ```
     You'll see an example below
 
@@ -150,7 +156,9 @@ imshow(img)
 ```
 
 !!! tip "Column Names"
-    You need to know the column names to interact with the data in the `.data` shelf. Use 
+    You need to know the column names to interact with the data in the `.data` shelf.
+    These names will be printed to the terminal when you import data. But if you
+    missed/forget them, use 
     ```python
     stock.data.keys()
     ```
@@ -218,9 +226,7 @@ As `.data` shelf store your data, hyper-parameters and experiment artifacts must
 will eventually allow you to store any artificats, like a loss graph, or a pickled file you'd need
 for training your model etc.
 
-```python hl_lines="1 16 17"
-stock = StockRoom(write=True)
-
+```python hl_lines="14 15 16"
 for epoch in range(2):
     p = tqdm(dloader)
     for i, (inputs, labels) in enumerate(p):
@@ -234,10 +240,10 @@ for epoch in range(2):
             current_loss = running_loss / check_every
             running_loss = 0.0
             if current_loss < best_loss:
-                stock.experiment['lr'] = lr
-                stock.experiment['momentum'] = momentum
-                stock.model['cifarmodel'] = net.state_dict()
-                stock.commit(f"Experiment with better result. Loss={best_loss}")
+                with stock.enable_write(commit_msg=f"{best_loss=}"):
+                    stock.experiment['lr'] = lr
+                    stock.experiment['momentum'] = momentum
+                    stock.model['cifarmodel'] = net.state_dict()
                 best_loss = current_loss
 ```
 
@@ -247,9 +253,7 @@ The `.model` shelf takes `state_dict` from a pytorch model and nothing else. You
 a `jit`ed model into your `.experiment` store but `.model` shelf is designed to store your model weights passed
 as a dictionary.
 
-```python hl_lines="18"
-stock = StockRoom(write=True)
-
+```python hl_lines="14 17"
 for epoch in range(2):
     p = tqdm(dloader)
     for i, (inputs, labels) in enumerate(p):
@@ -263,10 +267,10 @@ for epoch in range(2):
             current_loss = running_loss / check_every
             running_loss = 0.0
             if current_loss < best_loss:
-                stock.experiment['lr'] = lr
-                stock.experiment['momentum'] = momentum
-                stock.model['cifarmodel'] = net.state_dict()
-                stock.commit(f"Experiment with better result. Loss={best_loss}")
+                with stock.enable_write(commit_msg=f"{best_loss=}"):
+                    stock.experiment['lr'] = lr
+                    stock.experiment['momentum'] = momentum
+                    stock.model['cifarmodel'] = net.state_dict()
                 best_loss = current_loss
 ```
 
@@ -277,12 +281,12 @@ for epoch in range(2):
 
 ### Commit your changes
 
-Commit your changes as you move forward, you can always time travel back and look at
+Commit your changes as you move forward, you can always time travel back and look at. With the context
+managers, `autocommit` is enabled by default. You can control this behaviour by changing the argument
+value
 `.data` or `.experiment` or `.model` shelves
 
-```python hl_lines="19"
-stock = StockRoom(write=True)
-
+```python hl_lines="14"
 for epoch in range(2):
     p = tqdm(dloader)
     for i, (inputs, labels) in enumerate(p):
@@ -296,10 +300,10 @@ for epoch in range(2):
             current_loss = running_loss / check_every
             running_loss = 0.0
             if current_loss < best_loss:
-                stock.experiment['lr'] = lr
-                stock.experiment['momentum'] = momentum
-                stock.model['cifarmodel'] = net.state_dict()
-                stock.commit(f"Experiment with better result. Loss={best_loss}")
+                with stock.enable_write(commit_msg=f"{best_loss=}"):
+                    stock.experiment['lr'] = lr
+                    stock.experiment['momentum'] = momentum
+                    stock.model['cifarmodel'] = net.state_dict()
                 best_loss = current_loss
 ```
 

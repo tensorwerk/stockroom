@@ -53,7 +53,7 @@ $ pip install stockroom
 ```python
 from stockroom import StockRoom
 
-stock = StockRoom(write=True)
+stock = StockRoom(enable_write=True)
 model.load_state_dict(stock.model['resnet50'])
 for e in range(epochs):
     for i in range(limit):
