@@ -53,3 +53,13 @@ def test_import(repo, torchvision_cifar10):
     assert stock.data["cifar10-train-image"][0].shape == (3, 32, 32)
     assert stock.data["cifar10-test-label"][0].shape == tuple()
     assert stock.data["cifar10-train-image"][0].dtype == np.float32
+
+
+def test_liberate(writer_stock):
+    with pytest.raises(PermissionError):
+        StockRoom(enable_write=True)
+    runner = CliRunner()
+    res = runner.invoke(cli.liberate)
+    assert res.exit_code == 0
+    stock = StockRoom(enable_write=True)
+    stock.close()
