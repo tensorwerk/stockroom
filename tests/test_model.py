@@ -36,6 +36,16 @@ def test_saving_model(writer_stock):
         )
 
 
+def test_save_in_context_manager(reader_stock):
+    assert reader_stock.model.keys() == tuple()
+    model = get_model()
+    with pytest.raises(AttributeError):  # TODO: should be a permission error
+        reader_stock.model["model"] = model.state_dict()
+    with reader_stock.enable_write():
+        reader_stock.model["model"] = model.state_dict()
+    assert reader_stock.model.keys() == ("model",)
+
+
 def test_saving_two_models(writer_stock):
     model1 = get_model()
     model2 = get_model()
