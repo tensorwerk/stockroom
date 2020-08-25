@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 from stockroom.external.importer.base import BaseImporter
 
@@ -37,7 +35,7 @@ class TorchvisionCommon(BaseImporter):
             yield self._process_data(img, label)
 
     def variability_status(self):
-        return False
+        return False, False
 
     def __len__(self):
         return len(self.dataset)
@@ -81,3 +79,47 @@ class FashionMnist(TorchvisionCommon):
     @classmethod
     def gen_splits(cls, root):
         return super().gen_splits(datasets.FashionMNIST, root)
+
+
+class VOCSegmentation(BaseImporter):
+    name = "voc_segmentation"
+
+    def __init__(self, root, split):
+        assert split in ["train", "trainval", "val"]
+        self.split = split
+        self.dataset = datasets.VOCSegmentation(root, image_set=split, download=True)
+        self.sample_img, self.sample_seg = self._process_data(*self.dataset[0])
+
+    def column_names(self):
+        return f"{self.name}-{self.split}-image", f"{self.name}-{self.split}-segment"
+
+    def shapes(self):
+        return (3, 500, 500), (500, 500)
+
+    def dtypes(self):
+        return self.sample_img.dtype, self.sample_seg.dtype
+
+    def variability_status(self):
+        return True, True
+
+    @classmethod
+    def gen_splits(cls, root):
+        dataset_splits = []
+        for split in ["train", "trainval", "val"]:
+            dataset_splits.append(cls(root, split))
+        return dataset_splits
+
+    def __iter__(self):
+        for img, seg in self.dataset:
+            yield self._process_data(img, seg)
+
+    def __len__(self):
+        return len(self.dataset)
+
+    @staticmethod
+    def _process_data(img, seg):
+        img = np.transpose(np.array(img), (2, 0, 1))
+        img = np.ascontiguousarray(img)
+        seg = np.ascontiguousarray(np.array(seg))
+
+        return img, seg
