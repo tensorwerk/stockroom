@@ -1,7 +1,12 @@
+import inspect
+from pathlib import Path
+
+import numpy as np
 import pytest
 import stockroom.cli as cli
 from click.testing import CliRunner
-from stockroom import StockRoom
+from stockroom import StockRoom, console, init_repo
+from test_model import get_model
 
 
 def test_version():
@@ -46,3 +51,51 @@ def test_liberate(writer_stock):
     assert res.exit_code == 0
     stock = StockRoom(enable_write=True)
     stock.close()
+
+
+def mock_model_table(models: tuple):
+    assert type(models) == tuple
+    assert models[0] == "test_model"
+
+
+def mock_experiment_table(tags: dict):
+    assert type(tags) == dict
+    assert tags == {"test_tag": "0.01"}
+
+
+def mock_data_table(column_info: list):
+    name, length, shape, dtype = column_info[0]
+    assert name == "ndcol"
+    assert length == 1
+    assert shape == (4, 5)
+    assert dtype == np.int64
+
+
+@pytest.mark.parametrize("flag", ["model", "data", "experiment"])
+def test_list(writer_stock, monkeypatch, flag):
+    monkeypatch.setattr(console, "print_models_table", mock_model_table)
+    monkeypatch.setattr(console, "print_experiment_tags", mock_experiment_table)
+    monkeypatch.setattr(console, "print_data_summary", mock_data_table)
+
+    model = get_model()
+    writer_stock.model["test_model"] = model.state_dict()
+    writer_stock.experiment["test_tag"] = "0.01"
+    writer_stock.data["ndcol"][0] = np.zeros((4, 5)).astype(np.int64)
+    writer_stock.commit("added model")
+    runner = CliRunner()
+    res = runner.invoke(cli.list_shelf, [f"--{flag}"])
+    assert res.exit_code == 0
+
+    writer_stock.commit
+
+
+def test_get_stock_obj(managed_tmpdir, monkeypatch):
+    cwd = Path(managed_tmpdir)
+    monkeypatch.setattr(Path, "cwd", lambda: cwd)
+    with pytest.raises(RuntimeError):
+        cli.get_stock_obj(cwd)
+    cwd.joinpath(".git").mkdir()
+    cwd.joinpath(".gitignore").touch()
+    init_repo("test", "t@est.com")
+    stock_obj = cli.get_stock_obj(cwd)
+    assert stock_obj.path == cwd

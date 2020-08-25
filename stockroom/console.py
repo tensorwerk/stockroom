@@ -67,7 +67,7 @@ def print_data_summary(column_info: list):
     console.print(table)
 
 
-def print_models_table(models: list):
+def print_models_table(models: tuple):
     """
     Builds and prints Rich table with the models in the stock repo
     """
