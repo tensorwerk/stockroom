@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 import stockroom.cli as cli
 from click.testing import CliRunner
@@ -37,22 +36,6 @@ def test_commit(repo_with_col):
     assert "Commit message:\ntest commit" in res.stdout
     assert "Commit Successful. Digest" in res.stdout
     stock._repo._env._close_environments()
-
-
-def test_import(repo, torchvision_cifar10):
-    runner = CliRunner()
-    res = runner.invoke(cli.import_data, ["torchvision.cifar10"])
-    assert res.exit_code == 0
-    stock = StockRoom()
-    assert stock.data.keys() == (
-        "cifar10-test-image",
-        "cifar10-test-label",
-        "cifar10-train-image",
-        "cifar10-train-label",
-    )
-    assert stock.data["cifar10-train-image"][0].shape == (3, 32, 32)
-    assert stock.data["cifar10-test-label"][0].shape == tuple()
-    assert stock.data["cifar10-train-image"][0].dtype == np.float32
 
 
 def test_liberate(writer_stock):
