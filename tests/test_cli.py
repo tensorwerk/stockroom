@@ -54,21 +54,24 @@ def test_liberate(writer_stock):
 
 
 def mock_model_table(models: tuple):
-    assert type(models) == tuple
-    assert models[0] == "test_model"
+    if not models == ():
+        assert type(models) == tuple
+        assert models[0] == "test_model"
 
 
 def mock_experiment_table(tags: dict):
-    assert type(tags) == dict
-    assert tags == {"test_tag": "0.01"}
+    if not tags == {}:
+        assert type(tags) == dict
+        assert tags == {"test_tag": "0.01"}
 
 
 def mock_data_table(column_info: list):
-    name, length, shape, dtype = column_info[0]
-    assert name == "ndcol"
-    assert length == 1
-    assert shape == (4, 5)
-    assert dtype == np.int64
+    if not column_info == []:
+        name, length, shape, dtype = column_info[0]
+        assert name == "ndcol"
+        assert length == 1
+        assert shape == (4, 5)
+        assert dtype == np.int64
 
 
 @pytest.mark.parametrize("flag", ["model", "data", "experiment"])
@@ -77,12 +80,14 @@ def test_list(writer_stock, monkeypatch, flag):
     monkeypatch.setattr(console, "print_experiment_tags", mock_experiment_table)
     monkeypatch.setattr(console, "print_data_summary", mock_data_table)
 
+    runner = CliRunner()
+    res = runner.invoke(cli.list_shelf, [f"--{flag}"])
+    assert res.exit_code == 0
     model = get_model()
     writer_stock.model["test_model"] = model.state_dict()
     writer_stock.experiment["test_tag"] = "0.01"
     writer_stock.data["ndcol"][0] = np.zeros((4, 5)).astype(np.int64)
     writer_stock.commit("added model")
-    runner = CliRunner()
     res = runner.invoke(cli.list_shelf, [f"--{flag}"])
     assert res.exit_code == 0
 
