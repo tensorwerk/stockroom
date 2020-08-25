@@ -4,10 +4,26 @@ import click
 from click_didyoumean import DYMGroup  # type: ignore
 from hangar import Repository
 from rich.progress import Progress
-from stockroom import __version__, external
+from stockroom import __version__, console, external
 from stockroom.core import StockRoom
 from stockroom.keeper import init_repo
-from stockroom.utils import clean_create_column, print_columns_added
+from stockroom.utils import clean_create_column
+
+
+def get_stock_obj(path: Path = Path.cwd(), enable_write=False):
+    try:
+        stock_obj = StockRoom(enable_write=enable_write)
+    except RuntimeError:
+        repo = Repository(".", exists=False)
+        if not repo.initialized:
+            raise RuntimeError(
+                "Repository is not initialized. Check `stock init --help` "
+                "details about how to initialize a repository"
+            )
+        else:
+            raise
+
+    return stock_obj
 
 
 @click.group(
@@ -96,6 +112,35 @@ def liberate():
         click.echo("Error while attempting to release the writer lock")
 
 
+@stock.command(name="list")
+@click.option("--data", "-d", is_flag=True)
+@click.option("--model", "-m", is_flag=True)
+@click.option("--experiment", "-e", is_flag=True)
+def list_shelf(data, model, experiment):
+    stock_obj = get_stock_obj()
+    console.print_current_head(stock_obj.head)
+    if data:
+        columns = []
+        for col in stock_obj.data.keys():
+
+            shape = stock_obj.data[col].shape
+            length = len(stock_obj.data[col])
+            dtype = stock_obj.data[col].dtype
+
+            columns.append((col, length, shape, dtype))
+        console.print_data_summary(columns)
+
+    if model:
+        models = stock_obj.model.keys()
+
+        console.print_models_table(models)
+
+    if experiment:
+        tags = stock_obj.experiment.keys()
+        tags = {tag: stock_obj.experiment[tag] for tag in tags}
+        console.print_experiment_tags(tags)
+
+
 @stock.command(name="import")
 @click.argument("dataset_name")
 @click.option(
@@ -114,17 +159,8 @@ def import_data(dataset_name, download_dir):
     to StockRoom. It creates the repo if it doesn't exist and loads the dataset
     into a repo for you
     """
-    try:
-        stock_obj = StockRoom(enable_write=True)
-    except RuntimeError:
-        repo = Repository(".", exists=False)
-        if not repo.initialized:
-            raise RuntimeError(
-                "Repository is not initialized. Check `stock init --help` "
-                "details about how to initialize a repository"
-            )
-        else:
-            raise
+    stock_obj = get_stock_obj(enable_write=True)
+
     # TODO: use the auto-column-creation logic in stockroom later
     co = stock_obj.accessor
     importers = external.get_importers(dataset_name, download_dir)
@@ -169,4 +205,4 @@ def import_data(dataset_name, download_dir):
     stock_obj.commit(f"Data from {dataset_name} added through stock import")
     stock_obj.close()
     click.echo(f"The {dataset_name} dataset has been added to StockRoom.")
-    print_columns_added(splits_added)
+    console.print_columns_added(splits_added)
