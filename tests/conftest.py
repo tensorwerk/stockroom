@@ -1,10 +1,11 @@
+import inspect
 import shutil
 from pathlib import Path
 
 import hangar
 import numpy as np
 import pytest
-from PIL import Image
+import torchvision_mocks as torchvision
 from stockroom import StockRoom, keeper
 from torchvision import datasets
 
@@ -63,21 +64,15 @@ def reader_stock(writer_stock):
     stock_obj._repo._env._close_environments()
 
 
-class CIFAR10:
-    def __init__(self, root, train, download):
-        pass
-
-    def __len__(self):
-        return 1
-
-    def __iter__(self):
-        yield self[0]
-
-    def __getitem__(self, index):
-        img = np.random.random((32, 32, 3)).astype(np.uint8)
-        return Image.fromarray(img), index
+def is_valid(x):
+    return (
+        inspect.isclass(x)
+        and issubclass(x, torchvision.Torchvision)
+        and x != torchvision.Torchvision
+    )
 
 
 @pytest.fixture()
-def torchvision_cifar10(monkeypatch):
-    monkeypatch.setattr(datasets, "CIFAR10", CIFAR10)
+def torchvision_datasets(monkeypatch):
+    for n, cls in inspect.getmembers(torchvision, is_valid):
+        monkeypatch.setattr(datasets, n, cls)
