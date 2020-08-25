@@ -137,16 +137,24 @@ def import_data(dataset_name, download_dir):
             column_names = importer.column_names()
             dtypes = importer.dtypes()
             shapes = importer.shapes()
+            variability = importer.variability_status()
             splits_added[importer.split] = (column_names, len(importer))
 
             new_col_details = []
-            for colname, dtype, shape in zip(column_names, dtypes, shapes):
+            for colname, dtype, shape, variability in zip(
+                column_names, dtypes, shapes, variability
+            ):
                 if colname not in co.keys():
                     # TODO: this assuming importer always return a numpy flat array
                     new_col_details.append(
                         (
                             "add_ndarray_column",
-                            {"name": colname, "dtype": dtype, "shape": shape},
+                            {
+                                "name": colname,
+                                "dtype": dtype,
+                                "shape": shape,
+                                "variable_shape": variability,
+                            },
                         )
                     )
             clean_create_column(co, new_col_details)
