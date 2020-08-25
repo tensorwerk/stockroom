@@ -136,23 +136,33 @@ def list_shelf(data, model, experiment):
     console.print_current_head(stock_obj.head)
     if data:
         columns = []
-        for col in stock_obj.data.keys():
+        try:
+            for col in stock_obj.data.keys():
 
-            shape = stock_obj.data[col].shape
-            length = len(stock_obj.data[col])
-            dtype = stock_obj.data[col].dtype
+                shape = stock_obj.data[col].shape
+                length = len(stock_obj.data[col])
+                dtype = stock_obj.data[col].dtype
 
-            columns.append((col, length, shape, dtype))
+                columns.append((col, length, shape, dtype))
+        except AttributeError:
+            pass
         console.print_data_summary(columns)
 
     if model:
-        models = stock_obj.model.keys()
+        try:
+            models = stock_obj.model.keys()
+        except AttributeError:
+            models = ()
 
         console.print_models_table(models)
 
     if experiment:
-        tags = stock_obj.experiment.keys()
-        tags = {tag: stock_obj.experiment[tag] for tag in tags}
+        try:
+            tags = stock_obj.experiment.keys()
+            tags = {tag: stock_obj.experiment[tag] for tag in tags}
+        except TypeError:
+            tags = {}
+
         console.print_experiment_tags(tags)
 
 
