@@ -113,10 +113,25 @@ def liberate():
 
 
 @stock.command(name="list")
-@click.option("--data", "-d", is_flag=True)
-@click.option("--model", "-m", is_flag=True)
-@click.option("--experiment", "-e", is_flag=True)
+@click.option(
+    "--data",
+    "-d",
+    is_flag=True,
+    help="Flag to show the data shelf and show a summary of the data",
+)
+@click.option(
+    "--model",
+    "-m",
+    is_flag=True,
+    help="Flag to show the model shelf and list the models.",
+)
+@click.option(
+    "--experiment", "-e", is_flag=True, help="Flag to show the tags and their values",
+)
 def list_shelf(data, model, experiment):
+    """
+    Lists the items in the 3 shelves(Data, Model, Experiment) for the current stock head.
+    """
     stock_obj = get_stock_obj()
     console.print_current_head(stock_obj.head)
     if data:
