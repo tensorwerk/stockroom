@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## In Progress
 
+* [**Added**] Added `stock list` to display the 3 shelves. [#40](https://github.com/tensorwerk/stockroom/pull/40) [@jjmachan](https://github.com/jjmachan)
+
 * [**Added**] VOC segmentation dataset from torchvision. [#39](https://github.com/tensorwerk/stockroom/pull/39) [@jjmachan](https://github.com/jjmachan)
 
 * [**Added**] Read only stock objects can right inside `enable_write` context manager. [#37](https://github.com/tensorwerk/stockroom/pull/37) [@hhsecond](https://github.com/hhecond)
