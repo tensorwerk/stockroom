@@ -42,6 +42,6 @@ setup(
     name='stockroom',
     packages=find_packages(include=['stockroom', 'stockroom.*']),
     url='https://github.com/tensorwerk/stockroom',
-    version='0.2.2',
+    version='0.3.0',
     zip_safe=False,
 )
