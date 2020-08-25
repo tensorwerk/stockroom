@@ -6,7 +6,8 @@ The format is a modified version based on [Keep a Changelog](https://keepachange
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 
-## In Progress
+## 0.3.0
+2020-08-25
 
 * [**Added**] Added `stock list` to display the 3 shelves. [#40](https://github.com/tensorwerk/stockroom/pull/40) [@jjmachan](https://github.com/jjmachan)
 
