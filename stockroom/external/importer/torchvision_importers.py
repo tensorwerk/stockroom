@@ -81,7 +81,7 @@ class FashionMnist(TorchvisionCommon):
         return super().gen_splits(datasets.FashionMNIST, root)
 
 
-class VOCSegmentation(BaseImporter):
+class VOCSegmentation(TorchvisionCommon):
     name = "voc_segmentation"
 
     def __init__(self, root, split):
@@ -109,17 +109,9 @@ class VOCSegmentation(BaseImporter):
             dataset_splits.append(cls(root, split))
         return dataset_splits
 
-    def __iter__(self):
-        for img, seg in self.dataset:
-            yield self._process_data(img, seg)
-
-    def __len__(self):
-        return len(self.dataset)
-
     @staticmethod
     def _process_data(img, seg):
         img = np.transpose(np.array(img), (2, 0, 1))
         img = np.ascontiguousarray(img)
         seg = np.ascontiguousarray(np.array(seg))
-
         return img, seg
