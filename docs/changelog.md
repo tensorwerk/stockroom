@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## In Progress
 
+* [**Added**] VOC segmentation dataset from torchvision. [#39](https://github.com/tensorwerk/stockroom/pull/39) [@jjmachan](https://github.com/jjmachan)
+
 * [**Added**] Read only stock objects can right inside `enable_write` context manager. [#37](https://github.com/tensorwerk/stockroom/pull/37) [@hhsecond](https://github.com/hhecond)
 
 * [**Breaking change**] `stock.run()` is removed. All the write enabled accessors optimized on creation [#37](https://github.com/tensorwerk/stockroom/pull/37) [@hhsecond](https://github.com/hhecond)
