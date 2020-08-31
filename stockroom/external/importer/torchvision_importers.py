@@ -85,7 +85,9 @@ class VOCSegmentation(TorchvisionCommon):
     name = "voc_segmentation"
 
     def __init__(self, root, split):
-        assert split in ["train", "trainval", "val"]
+        if split not in ("train", "trainval", "val"):
+            raise ValueError(f"Value is split is not valid {split}. "
+                             f"Expected one of (train, trainval, val)")
         self.split = split
         self.dataset = datasets.VOCSegmentation(root, image_set=split, download=True)
         self.sample_img, self.sample_seg = self._process_data(*self.dataset[0])
