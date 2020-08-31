@@ -2,7 +2,7 @@ import pytest
 
 
 def test_basic(writer_stock):
-    assert writer_stock.experiment.keys() == tuple()
+    assert writer_stock.experiment.keys() == ()
     writer_stock.experiment["lr"] = 0.01
     writer_stock.experiment["epochs"] = 500
     writer_stock.experiment["optimizer"] = "adam"

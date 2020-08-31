@@ -18,7 +18,7 @@ def test_import_cifar(repo, torchvision_datasets, dataset, splits, columns):
     assert stock.data.keys() == tuple(keys)
 
     assert stock.data[f"{dataset}-train-image"][0].shape == (3, 32, 32)
-    assert stock.data[f"{dataset}-test-label"][0].shape == tuple()
+    assert stock.data[f"{dataset}-test-label"][0].shape == ()
     assert stock.data[f"{dataset}-train-image"][0].dtype == np.float32
 
 
@@ -41,7 +41,7 @@ def test_import_mnist(repo, torchvision_datasets, dataset, splits, columns):
     assert data_keys == keys
 
     assert stock.data[f"{dataset}-train-image"][0].shape == (28, 28)
-    assert stock.data[f"{dataset}-test-label"][0].shape == tuple()
+    assert stock.data[f"{dataset}-test-label"][0].shape == ()
     assert stock.data[f"{dataset}-train-image"][0].dtype == np.float32
 
 

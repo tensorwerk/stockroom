@@ -50,8 +50,9 @@ class TestCommit:
     def test_basic(self, writer_stock):
         writer_stock.experiment["key1"] = "value"
         writer_stock.commit("generic data")
-        assert writer_stock.experiment["key1"] == "value"
         writer_stock.experiment["key2"] = "value2"
+        assert writer_stock.experiment["key1"] == "value"
+        assert writer_stock.experiment["key2"] == "value2"
 
     def test_commit_hash(self, writer_stock):
         writer_stock.experiment["key1"] = "value"

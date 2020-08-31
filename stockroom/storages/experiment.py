@@ -67,4 +67,4 @@ class Experiment:
         try:
             return tuple(self.accessor[self.tagkey].keys())
         except KeyError:
-            return tuple()
+            return ()

@@ -15,7 +15,7 @@ def get_model():
 # TODO: Ingore warning has no effect
 @pytest.mark.filterwarnings("ignore:the imp module is deprecated:DeprecationWarning")
 def test_saving_model(writer_stock):
-    assert writer_stock.model.keys() == tuple()
+    assert writer_stock.model.keys() == ()
     model = get_model()
     old_weights = model.state_dict()
     writer_stock.model["model"] = old_weights
@@ -37,7 +37,7 @@ def test_saving_model(writer_stock):
 
 
 def test_save_in_context_manager(reader_stock):
-    assert reader_stock.model.keys() == tuple()
+    assert reader_stock.model.keys() == ()
     model = get_model()
     with pytest.raises(AttributeError):  # TODO: should be a permission error
         reader_stock.model["model"] = model.state_dict()

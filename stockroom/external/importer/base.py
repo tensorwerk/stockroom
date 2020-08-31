@@ -46,7 +46,7 @@ class BaseImporter(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def gen_splits(cls):
+    def gen_splits(cls, *args, **kwargs):
         """
         This is a factory method which creates a tuple of Dataset objects
         corresponding to the different splits a dataset can have.

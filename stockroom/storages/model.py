@@ -137,7 +137,7 @@ class Model:
                     f"({library_version}) is not same as the one installed "
                     f"in the current environment. i.e {torch.__version__}"
                 )
-            return {layers[i]: torch.from_numpy(weights[i]) for i in range(num_layers)}
+            out = {layers[i]: torch.from_numpy(weights[i]) for i in range(num_layers)}
 
         else:
             if tf.__version__ != library_version:
@@ -146,7 +146,8 @@ class Model:
                     f"({library_version}) is not same as the one installed "
                     f"in the current environment. i.e {tf.__version__}"
                 )
-            return weights
+            out = weights
+        return out
 
     def keys(self):
         out = set()

@@ -10,7 +10,7 @@ from stockroom.keeper import init_repo
 from stockroom.utils import clean_create_column
 
 
-def get_stock_obj(path: Path = Path.cwd(), enable_write=False):
+def get_stock_obj(enable_write=False):
     try:
         stock_obj = StockRoom(enable_write=enable_write)
     except RuntimeError:
@@ -20,8 +20,7 @@ def get_stock_obj(path: Path = Path.cwd(), enable_write=False):
                 "Repository is not initialized. Check `stock init --help` "
                 "details about how to initialize a repository"
             )
-        else:
-            raise
+        raise
 
     return stock_obj
 

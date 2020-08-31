@@ -1,4 +1,3 @@
-import inspect
 from pathlib import Path
 
 import numpy as np
@@ -55,13 +54,13 @@ def test_liberate(writer_stock):
 
 def mock_model_table(models: tuple):
     if not models == ():
-        assert type(models) == tuple
+        assert isinstance(models, tuple)
         assert models[0] == "test_model"
 
 
 def mock_experiment_table(tags: dict):
     if not tags == {}:
-        assert type(tags) == dict
+        assert isinstance(tags, dict)
         assert tags == {"test_tag": "0.01"}
 
 
@@ -82,6 +81,7 @@ def test_list(writer_stock, monkeypatch, flag):
 
     runner = CliRunner()
     res = runner.invoke(cli.list_shelf, [f"--{flag}"])
+    # TODO: test the output
     assert res.exit_code == 0
     model = get_model()
     writer_stock.model["test_model"] = model.state_dict()
@@ -90,8 +90,6 @@ def test_list(writer_stock, monkeypatch, flag):
     writer_stock.commit("added model")
     res = runner.invoke(cli.list_shelf, [f"--{flag}"])
     assert res.exit_code == 0
-
-    writer_stock.commit
 
 
 def test_get_stock_obj(managed_tmpdir, monkeypatch):
