@@ -68,7 +68,7 @@ class StockRoom:
             with self.accessor:
                 yield
             if autocommit and self.accessor.diff.status() != "CLEAN":
-                self.accessor.commit(commit_msg)
+                self.commit(commit_msg)
             self.accessor.close()
 
             # TODO: these objects doesn't need to recreate no column creation inside the CM.
