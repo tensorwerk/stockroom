@@ -126,7 +126,10 @@ def liberate():
     help="Flag to show the model shelf and list the models.",
 )
 @click.option(
-    "--experiment", "-e", is_flag=True, help="Flag to show the tags and their values",
+    "--experiment",
+    "-e",
+    is_flag=True,
+    help="Flag to show the tags and their values",
 )
 def list_shelf(data, model, experiment):
     """
