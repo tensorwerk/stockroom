@@ -1,74 +1,52 @@
+from collections import namedtuple
 import abc
+from typing import Optional, Tuple
+
+
+ColumnSchema = namedtuple(
+    "ColumnSchema", field_names=["name", "shape", "dtype", "is_variable_shaped"]
+)
 
 
 class BaseImporter(abc.ABC):
-    name: str = "base"
+    _column_schemas = []
 
-    @abc.abstractmethod
-    def column_names(self):
-        """
-        Return the names for each data entitiy. For instance, if each data sample returns
-        an image and a label, this function could return `(image, label)` so that
-        stockroom creates an image column for image data and label column for label data
-        """
+    def __init__(self, split: str):
+        self.split = split
 
-    @abc.abstractmethod
-    def shapes(self):
-        """
-        Return the shape of the data sample(s). Return a tuple of shapes if one data
-        sample has more than one data entity. For instance, if the data sample is
-        image and label, this function need to return `(shape of image, shape of label)`.
-        If the shape is variable, return the maximum value of shape in each dimension.
-        """
-        pass
+    def register_column(
+        self,
+        name: str,
+        shape: Optional[Tuple] = None,
+        dtype: Optional = None,
+        is_variable_shaped: Optional[bool] = False,
+    ):
+        if is_variable_shaped and not isinstance(shape, tuple):
+            raise ValueError("`shape` argument is not valid for a variable shaped column")
 
-    @abc.abstractmethod
-    def dtypes(self):
-        """
-        Return the datatype of the data sample. The data must be homogenous across
-        dataset. If one data sample has more than one data entity, return a tuple
-        of dtypes. For instance, if the data sample is image and label, then this
-        function should return `(dtype of image, dtype of label)`.
-        """
-        pass
+        if any([shape is None, dtype is None]):
+            i = len(self._column_schemas)
+            element = next(iter(self))[i]
+            shape = element.shape if shape is None else shape
+            dtype = element.dtype if dtype is None else dtype
 
-    @abc.abstractmethod
-    def variability_status(self):
-        """
-        Return True/False depending on the shape of the data sample across the
-        dataset is variable or not. If the data sample contains more than one data
-        entity, this function should return tuple of boolean values. For instance,
-        if the data sample is image and label, then this function should return
-        `(is_variable(image), is_variable(label))` where `is_variable` is a custom
-        function to check the variability across the dataset.
-        """
-        pass
-
-    @classmethod
-    @abc.abstractmethod
-    def gen_splits(cls, *args, **kwargs):
-        """
-        This is a factory method which creates a tuple of Dataset objects
-        corresponding to the different splits a dataset can have.
-        """
-        pass
+        schema = ColumnSchema(name, shape, dtype, is_variable_shaped)
+        self._column_schemas.append(schema)
 
     @abc.abstractmethod
     def __iter__(self):
         """
-        Yield data sample from the dataset. If the data sample contains more than one
-        data entity, this function should return a tuple. For instance, if the data
-        sample is image and label, then this function should return `(image, label)`.
-
-        Note that the keys for each data sample would be integers incrementing by one
-        from zero to len(dataset). In the current implementation, setting custom keys
-        is not allowed but might enable in the future releases
+        Should be defined by child class and should return an iterator or yield
+        instead of return.
         """
         pass
 
-    @abc.abstractmethod
-    def __len__(self):
+    @classmethod
+    def gen_splits(cls):
         """
-        Return the length of the dataset. Simlar to `len(pytorch_dataset)`
+        This is a factory method which creates a tuple of Dataset objects
+        corresponding to the different splits a dataset can have. Almost always,
+        it's not necessary to override this method
         """
-        pass
+        for split in ("train", "test", "val"):
+            yield cls(split)
