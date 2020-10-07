@@ -20,7 +20,8 @@ class TestInit:
         repo_path.joinpath(".git").mkdir()
         return repo_path
 
-    def test_init(self, repo_path):
+    @staticmethod
+    def test_init(repo_path):
         cwd = repo_path
         cwd.joinpath(".git").mkdir()
         with pytest.raises(ValueError):
@@ -35,7 +36,8 @@ class TestInit:
         assert cwd.joinpath(".hangar").exists()
         assert cwd.joinpath("head.stock").exists()
 
-    def test_stock_init_on_existing_hangar_repo(self, cwd):
+    @staticmethod
+    def test_stock_init_on_existing_hangar_repo(cwd):
         repo = hangar.Repository(cwd, exists=False)
         repo.init("a", "a@b.c")
         repo._env._close_environments()
@@ -47,14 +49,16 @@ class TestInit:
 
 
 class TestCommit:
-    def test_basic(self, writer_stock):
+    @staticmethod
+    def test_basic(writer_stock):
         writer_stock.experiment["key1"] = "value"
         writer_stock.commit("generic data")
         writer_stock.experiment["key2"] = "value2"
         assert writer_stock.experiment["key1"] == "value"
         assert writer_stock.experiment["key2"] == "value2"
 
-    def test_commit_hash(self, writer_stock):
+    @staticmethod
+    def test_commit_hash(writer_stock):
         writer_stock.experiment["key1"] = "value"
         writer_stock.commit("generic data")
         with open(writer_stock.stockroot / "head.stock") as f:

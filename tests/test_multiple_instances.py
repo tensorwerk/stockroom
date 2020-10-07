@@ -6,7 +6,8 @@ from stockroom import StockRoom
 
 
 class TestSameProcess:
-    def test_opening_two_instances(self, writer_stock):
+    @staticmethod
+    def test_opening_two_instances(writer_stock):
         with pytest.raises(PermissionError):
             StockRoom(enable_write=True)
         arr = np.arange(20).reshape(4, 5)
